@@ -55,10 +55,13 @@ function searchUser() {
         .then(res => res.json())
         .then(repos => {
             const reposHTML = repos.map(repo => `
-                <div>
-                    <a href="${repo.html_url}" target="_blank">${repo.name}</a>
-                    <p>${repo.description || 'No description'}</p>
-                    <p>Stars: ${repo.stargazers_count} | Language: ${repo.language || 'N/A'}</p>
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-3">
+                    <a href="${repo.html_url}" target="_blank" class="text-blue-400 font-semibold hover:underline text-lg">${repo.name}</a>
+                    <p class="text-gray-400 text-sm mt-1">${repo.description || 'No description'}</p>
+                    <div class="flex gap-4 mt-2 text-sm text-gray-500">
+                        <span>Stars: ${repo.stargazers_count}</span>
+                        <span>Language: ${repo.language || 'N/A'}</span>
+                    </div>
                 </div>
             `).join('');
 
