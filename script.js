@@ -1,79 +1,101 @@
+const searchInput = document.getElementById('search');
 const btn = document.getElementById('btn');
-const search = document.getElementById('search');
+const errorMsg = document.getElementById('error-msg');
+const mainLayout = document.getElementById('main-layout');
+const list = document.getElementById('repos-list');
+const template = document.getElementById('repo-template');
+const avatar = document.getElementById('avatar');
+const nameEl = document.getElementById('name');
+const loginEl = document.getElementById('login');
+const bio = document.getElementById('bio');
+const followers = document.getElementById('followers');
+const following = document.getElementById('following');
+const reposCount = document.getElementById('repos-count');
+const createdAt = document.getElementById('created-at');
+const locationRow = document.getElementById('location-row');
+const locationEl = document.getElementById('location');
+const blogRow = document.getElementById('blog-row');
+const blogEl = document.getElementById('blog');
+const twitterRow = document.getElementById('twitter-row');
+const twitterEl = document.getElementById('twitter');
+const companyRow = document.getElementById('company-row');
+const companyEl = document.getElementById('company');
 
 function searchUser() {
-    const username = search.value.trim();
+    const username = searchInput.value.trim();
     if (!username) return;
 
-    fetch(`https://api.github.com/users/${username}`)
-        .then(res => {
-            if (!res.ok) throw new Error('User not found');
-            return res.json();
-        })
-        .then(data => {
-        document.getElementById('result').innerHTML = `
-            <div class="bg-gray-900 rounded-2xl p-6 mb-6 border border-gray-800">
-                <div class="flex items-center gap-6">
-                    <img src="${data.avatar_url}" class="w-24 h-24 rounded-full border-2 border-blue-500">
-                    <div>
-                        <h2 class="text-2xl font-bold">${data.name || data.login}</h2>
-                        <p class="text-blue-400">@${data.login}</p>
-                        <p class="text-gray-400 mt-1">${data.bio || ''}</p>
-                    </div>
-                </div>
-        
-                <div class="grid grid-cols-3 gap-4 mt-6 text-center">
-                    <div class="bg-gray-800 rounded-xl p-4">
-                        <p class="text-2xl font-bold text-blue-400">${data.followers}</p>
-                        <p class="text-gray-400 text-sm">Followers</p>
-                    </div>
-                    <div class="bg-gray-800 rounded-xl p-4">
-                        <p class="text-2xl font-bold text-blue-400">${data.following}</p>
-                        <p class="text-gray-400 text-sm">Following</p>
-                    </div>
-                    <div class="bg-gray-800 rounded-xl p-4">
-                        <p class="text-2xl font-bold text-blue-400">${data.public_repos}</p>
-                        <p class="text-gray-400 text-sm">Repos</p>
-                    </div>
-                </div>
-        
-                <div class="mt-6 space-y-2 text-gray-400 text-sm">
-                    ${data.location ? `<p>Location: <span class="text-white">${data.location}</span></p>` : ''}
-                    ${data.blog ? `<p>Website: <a href="${data.blog}" target="_blank" class="text-blue-400 hover:underline">${data.blog}</a></p>` : ''}
-                    ${data.twitter_username ? `<p>Twitter: <span class="text-white">@${data.twitter_username}</span></p>` : ''}
-                    ${data.company ? `<p>Company: <span class="text-white">${data.company}</span></p>` : ''}
-                    <p>Member since: <span class="text-white">${new Date(data.created_at).toLocaleDateString()}</span></p>
-                </div>
-        
-                <img src="https://github-readme-stats.vercel.app/api?username=${data.login}&show_icons=true&theme=dark" class="mt-6 rounded-xl w-full">
-            </div>
-            <div id="repos"></div>
-        `;
+    errorMsg.classList.add('hidden');
+    mainLayout.classList.add('hidden');
+    mainLayout.classList.remove('flex');
 
-            return fetch(`https://api.github.com/users/${username}/repos?sort=stars&per_page=6`);
+    fetch('https://api.github.com/users/' + username)
+        .then(function(res) { return res.json(); })
+        .then(function(user) {
+            showProfile(user);
+            return fetch('https://api.github.com/users/' + username + '/repos?sort=stars&per_page=100');
         })
-        .then(res => res.json())
-        .then(repos => {
-            const reposHTML = repos.map(repo => `
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-3">
-                    <a href="${repo.html_url}" target="_blank" class="text-blue-400 font-semibold hover:underline text-lg">${repo.name}</a>
-                    <p class="text-gray-400 text-sm mt-1">${repo.description || 'No description'}</p>
-                    <div class="flex gap-4 mt-2 text-sm text-gray-500">
-                        <span>Stars: ${repo.stargazers_count}</span>
-                        <span>Language: ${repo.language || 'N/A'}</span>
-                    </div>
-                </div>
-            `).join('');
-
-            document.getElementById('repos').innerHTML = `<h3>Repositories</h3>${reposHTML}`;
+        .then(function(res) { return res.json(); })
+        .then(function(repos) {
+            showRepos(repos);
+            mainLayout.classList.remove('hidden');
+            mainLayout.classList.add('flex');
         })
-        .catch(err => {
-            document.getElementById('result').innerHTML = `<p>Error: ${err.message}</p>`;
+        .catch(function(err) {
+            errorMsg.textContent = 'Error: ' + err.message;
+            errorMsg.classList.remove('hidden');
         });
 }
 
-btn.addEventListener('click', searchUser);
+function showProfile(user) {
+    avatar.src = user.avatar_url;
+    nameEl.textContent = user.name || user.login;
+    loginEl.textContent = '@' + user.login;
+    bio.textContent = user.bio || '';
+    followers.textContent = user.followers;
+    following.textContent = user.following;
+    reposCount.textContent = user.public_repos;
+    createdAt.textContent = new Date(user.created_at).toLocaleDateString();
 
-search.addEventListener('keydown', (e) => {
+    showOrHide(locationRow, locationEl, user.location);
+    showOrHide(blogRow, blogEl, user.blog, true);
+    showOrHide(twitterRow, twitterEl, user.twitter_username ? '@' + user.twitter_username : null);
+    showOrHide(companyRow, companyEl, user.company);
+}
+
+function showOrHide(row, valueEl, value, isLink) {
+    if (!value) {
+        row.classList.add('hidden');
+        return;
+    }
+
+    valueEl.textContent = value;
+    if (isLink) valueEl.href = value;
+    row.classList.remove('hidden');
+}
+
+function showRepos(repos) {
+    const top = repos
+        .filter(function(r) { return !r.fork; })
+        .sort(function(a, b) { return b.stargazers_count - a.stargazers_count; })
+        .slice(0, 6);
+
+    list.innerHTML = '';
+
+    top.forEach(function(repo) {
+        const clone = template.content.cloneNode(true);
+
+        clone.querySelector('.repo-link').textContent = repo.name;
+        clone.querySelector('.repo-link').href = repo.html_url;
+        clone.querySelector('.repo-desc').textContent = repo.description || 'No description';
+        clone.querySelector('.repo-stars').textContent = repo.stargazers_count;
+        clone.querySelector('.repo-lang').textContent = repo.language || 'N/A';
+
+        list.appendChild(clone);
+    });
+}
+
+btn.addEventListener('click', searchUser);
+searchInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') searchUser();
 });
