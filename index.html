@@ -38,8 +38,8 @@
                 </div>
 
                 <div class="grid grid-cols-3 gap-2 text-center">
-                    <div class="bg-gray-800 rounded-xl p-3">
-                        <p id="followers" class="text-lg font-bold text-blue-400"></p>
+                    <div class="bg-gray-800 rounded-xl p-3 cursor-pointer hover:bg-gray-700 transition" id="followers-card" title="Click to see followers">
+                        <p id="followers" class="text-lg font-bold text-blue-400" id="followers-count-btn"></p>
                         <p class="text-gray-400 text-xs">Followers</p>
                     </div>
                     <div class="bg-gray-800 rounded-xl p-3">
@@ -71,6 +71,25 @@
             </div>
         </template>
 
+    </div>
+
+    <div id="followers-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+        <div id="followers-modal-content" class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+                <h2 class="text-lg font-bold text-white">Followers</h2>
+                <button id="close-modal" class="text-gray-400 hover:text-white transition text-2xl leading-none">&times;</button>
+            </div>
+            <div class="px-6 pt-4">
+                <input id="followers-search" type="text" placeholder="Filter followers..."
+                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500">
+            </div>
+            <div id="followers-list" class="overflow-y-auto max-h-80 px-6 py-4 space-y-3 [scrollbar-width:none] [class="px-6 py-4 space-y-3"::-webkit-scrollbar]:hidden">
+                <p id="followers-loading" class="text-gray-400 text-center text-sm py-6">Loading...</p>
+            </div>
+            <div id="modal-footer" class="px-6 pb-4 hidden">
+                <p id="followers-count-info" class="text-gray-500 text-xs text-center"></p>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
