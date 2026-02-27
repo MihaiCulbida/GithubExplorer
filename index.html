@@ -46,7 +46,7 @@
                         <p id="following" class="text-lg font-bold text-blue-400"></p>
                         <p class="text-gray-400 text-xs">Following</p>
                     </div>
-                    <div class="bg-gray-800 rounded-xl p-3">
+                    <div class="bg-gray-800 rounded-xl p-3 cursor-pointer hover:bg-gray-700 transition" id="repos-card" title="Click to see all repos">
                         <p id="repos-count" class="text-lg font-bold text-blue-400"></p>
                         <p class="text-gray-400 text-xs">Repos</p>
                     </div>
@@ -54,7 +54,12 @@
             </div>
 
             <div id="repos-section" class="flex-1">
-                <h3 class="text-lg font-semibold mb-3 text-gray-300">Top Repositories</h3>
+                <div class="flex items-center gap-3 mb-3">
+                    <button id="back-btn" class="hidden cursor-pointer hover:opacity-70 transition">
+                        <img src="img/back.png" class="w-6 h-6 invert" alt="Back">
+                    </button>
+                    <h3 id="repos-title" class="text-lg font-semibold text-gray-300">Top Repositories</h3>
+                </div>
                 <div id="repos-list"></div>
             </div>
 

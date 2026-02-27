@@ -58,6 +58,7 @@ function searchUser() {
         })
         .then(function(res) { return res.json(); })
         .then(function(repos) {
+            allRepos = repos;
             showRepos(repos);
             mainLayout.classList.remove('hidden');
             mainLayout.classList.add('flex');
@@ -113,6 +114,49 @@ function showRepos(repos) {
     });
 }
 
+const reposCard = document.getElementById('repos-card');
+const backBtn = document.getElementById('back-btn');
+let allRepos = [];
+
+reposCard.addEventListener('click', function() {
+    if (!currentUsername) return;
+    
+    const isOpen = backBtn.classList.contains('hidden') === false;
+    
+    if (isOpen) {
+        showRepos(allRepos);
+        document.getElementById('repos-title').textContent = 'Top Repositories';
+        backBtn.classList.add('hidden');
+    } else {
+        showAllRepos();
+        document.getElementById('repos-title').textContent = 'All Repositories';
+        backBtn.classList.remove('hidden');
+    }
+});
+
+backBtn.addEventListener('click', function() {
+    showRepos(allRepos);
+    document.getElementById('repos-title').textContent = 'Top Repositories';
+    backBtn.classList.add('hidden');
+});
+
+function showAllRepos() {
+    const sorted = allRepos
+        .filter(function(r) { return !r.fork; })
+        .sort(function(a, b) { return b.stargazers_count - a.stargazers_count; });
+
+    list.innerHTML = '';
+
+    sorted.forEach(function(repo) {
+        const clone = template.content.cloneNode(true);
+        clone.querySelector('.repo-link').textContent = repo.name;
+        clone.querySelector('.repo-link').href = repo.html_url;
+        clone.querySelector('.repo-desc').textContent = repo.description || 'No description';
+        clone.querySelector('.repo-stars').textContent = repo.stargazers_count;
+        clone.querySelector('.repo-lang').textContent = repo.language || 'N/A';
+        list.appendChild(clone);
+    });
+}
 
 function openFollowersModal() {
     followersModal.classList.remove('hidden');
