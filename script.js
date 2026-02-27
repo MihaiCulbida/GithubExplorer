@@ -346,3 +346,15 @@ followingModal.addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeFollowingModalFn();
 });
+
+const clearBtn = document.getElementById('clear-btn');
+
+searchInput.addEventListener('input', function() {
+    clearBtn.classList.toggle('hidden', this.value === '');
+});
+
+clearBtn.addEventListener('click', function() {
+    searchInput.value = '';
+    clearBtn.classList.add('hidden');
+    searchInput.focus();
+});
