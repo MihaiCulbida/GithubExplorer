@@ -39,6 +39,10 @@ const followingCountInfo = document.getElementById('following-count-info');
 const readmeSection = document.getElementById('readme-section');
 const readmeBody = document.getElementById('readme-body');
 const readmeTitle = document.getElementById('readme-title');
+const languagesSection = document.getElementById('languages-section');
+const languagesBtn = document.getElementById('languages-btn');
+const languagesList = document.getElementById('languages-list');
+const languagesChevron = document.getElementById('languages-chevron');
 
 let currentUsername = '';
 let allFollowers = [];
@@ -56,7 +60,7 @@ function searchUser() {
         .then(function(res) { return res.json(); })
         .then(function(user) {
             if (user.message) throw new Error(user.message);
-            showProfile(user);
+            showProfile(user)
             loadProfileReadme(username);
             return fetch('https://api.github.com/users/' + username + '/repos?sort=stars&per_page=100');
         })
@@ -64,6 +68,7 @@ function searchUser() {
         .then(function(repos) {
             allRepos = repos;
             showRepos(repos);
+            loadLanguages(repos, username);
             mainLayout.classList.remove('hidden');
             mainLayout.classList.add('flex');
         })
@@ -260,6 +265,7 @@ btn.addEventListener('click', searchUser);
 searchInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') searchUser();
 });
+
 let allFollowing = [];
 
 function openFollowingModal() {
@@ -386,3 +392,44 @@ async function loadProfileReadme(username) {
     } catch (err) {
     }
 }
+
+async function loadLanguages(repos, username) {
+    languagesSection.classList.add('hidden');
+    languagesList.innerHTML = '';
+
+    try {
+        const requests = repos
+            .filter(function(r) { return !r.fork; })
+            .map(function(r) {
+                return fetch('https://api.github.com/repos/' + username + '/' + r.name + '/languages')
+                    .then(function(res) { return res.json(); });
+            });
+
+        const results = await Promise.all(requests);
+        const unique = [...new Set(results.flatMap(function(obj) { return Object.keys(obj); }))];
+
+        if (unique.length === 0) return;
+
+        unique.forEach(function(lang) {
+            const tag = document.createElement('span');
+            tag.className = 'px-3 py-1 bg-gray-800 text-gray-300 text-xs rounded-full';
+            tag.textContent = lang;
+            languagesList.appendChild(tag);
+        });
+
+        languagesSection.classList.remove('hidden');
+    } catch (err) {}
+}
+
+languagesBtn.addEventListener('click', function() {
+    const isOpen = !languagesList.classList.contains('hidden');
+    if (isOpen) {
+        languagesList.classList.add('hidden');
+        languagesList.classList.remove('flex');
+        languagesChevron.style.transform = 'rotate(90deg)';
+    } else {
+        languagesList.classList.remove('hidden');
+        languagesList.classList.add('flex');
+        languagesChevron.style.transform = 'rotate(-90deg)';
+    }
+});
