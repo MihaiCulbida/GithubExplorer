@@ -36,6 +36,9 @@ const followingLoading = document.getElementById('following-loading');
 const followingSearch = document.getElementById('following-search');
 const followingModalFooter = document.getElementById('following-modal-footer');
 const followingCountInfo = document.getElementById('following-count-info');
+const readmeSection = document.getElementById('readme-section');
+const readmeBody = document.getElementById('readme-body');
+const readmeTitle = document.getElementById('readme-title');
 
 let currentUsername = '';
 let allFollowers = [];
@@ -54,6 +57,7 @@ function searchUser() {
         .then(function(user) {
             if (user.message) throw new Error(user.message);
             showProfile(user);
+            loadProfileReadme(username);
             return fetch('https://api.github.com/users/' + username + '/repos?sort=stars&per_page=100');
         })
         .then(function(res) { return res.json(); })
@@ -246,9 +250,11 @@ followersModal.addEventListener('click', function(e) {
     if (e.target === followersModal) closeFollowersModal();
 });
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeFollowersModal();
+    if (e.key === 'Escape') {
+        closeFollowersModal();
+        closeFollowingModalFn();
+    }
 });
-
 
 btn.addEventListener('click', searchUser);
 searchInput.addEventListener('keydown', function(e) {
@@ -312,7 +318,7 @@ function renderFollowing(users) {
         const item = document.createElement('a');
         item.href = user.html_url;
         item.target = '_blank';
-        item.className = 'flex items-center gap-3 p-2 rounded-xl hover:bg-gray-800 transition cursor-pointer group';
+        item.className = 'flex items-center gap3 p-2 rounded-xl hover:bg-gray-800 transition cursor-pointer group';
 
         item.innerHTML =
             '<img src="' + user.avatar_url + '" alt="' + user.login + '" class="w-10 h-10 rounded-full border border-gray-700 group-hover:border-blue-500 transition">' +
@@ -343,9 +349,6 @@ closeFollowingModal_btn.addEventListener('click', closeFollowingModalFn);
 followingModal.addEventListener('click', function(e) {
     if (e.target === followingModal) closeFollowingModalFn();
 });
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeFollowingModalFn();
-});
 
 const clearBtn = document.getElementById('clear-btn');
 
@@ -358,3 +361,28 @@ clearBtn.addEventListener('click', function() {
     clearBtn.classList.add('hidden');
     searchInput.focus();
 });
+
+async function loadProfileReadme(username) {
+    readmeSection.classList.add('hidden');
+    readmeBody.innerHTML = '';
+    readmeTitle.textContent = username + '/README.md';
+
+    try {
+        const res = await fetch(
+            'https://api.github.com/repos/' + username + '/' + username + '/contents/README.md'
+        );
+        if (!res.ok) return; 
+
+        const data = await res.json();
+        const markdown = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+
+        readmeBody.innerHTML = marked.parse(markdown);
+        readmeBody.querySelectorAll('a').forEach(function(a) {
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+        });
+
+        readmeSection.classList.remove('hidden');
+    } catch (err) {
+    }
+}
