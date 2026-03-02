@@ -43,7 +43,11 @@ const languagesSection = document.getElementById('languages-section');
 const languagesBtn = document.getElementById('languages-btn');
 const languagesList = document.getElementById('languages-list');
 const languagesChevron = document.getElementById('languages-chevron');
-
+const sortBtn = document.getElementById('sort-btn');
+const sortDropdown = document.getElementById('sort-dropdown');
+const sortLabel = document.getElementById('sort-label');
+let currentSort = 'stars';
+let isAllReposOpen = false;
 let currentUsername = '';
 let allFollowers = [];
 
@@ -129,33 +133,48 @@ let allRepos = [];
 
 reposCard.addEventListener('click', function() {
     if (!currentUsername) return;
-    
-    const isOpen = backBtn.classList.contains('hidden') === false;
-    
-    if (isOpen) {
+
+    if (isAllReposOpen) {
+        isAllReposOpen = false;
         showRepos(allRepos);
         document.getElementById('repos-title').textContent = 'Top Repositories';
         backBtn.classList.add('hidden');
+        sortBtn.classList.add('hidden');
     } else {
-        showAllRepos();
+        isAllReposOpen = true;
+        currentSort = 'stars';
+        sortLabel.textContent = 'Sort';
+        showAllReposSorted();
         document.getElementById('repos-title').textContent = 'All Repositories';
         backBtn.classList.remove('hidden');
+        sortBtn.classList.remove('hidden');
     }
 });
 
-backBtn.addEventListener('click', function() {
+backBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    isAllReposOpen = false;
     showRepos(allRepos);
     document.getElementById('repos-title').textContent = 'Top Repositories';
     backBtn.classList.add('hidden');
+    sortBtn.classList.add('hidden');
+    sortDropdown.classList.add('hidden');
 });
 
-function showAllRepos() {
-    const sorted = allRepos
-        .filter(function(r) { return !r.fork; })
-        .sort(function(a, b) { return b.stargazers_count - a.stargazers_count; });
+function showAllReposSorted() {
+    let sorted = allRepos.filter(function(r) { return !r.fork; });
+
+    if (currentSort === 'stars') {
+        sorted.sort(function(a, b) { return b.stargazers_count - a.stargazers_count; });
+    } else if (currentSort === 'name') {
+        sorted.sort(function(a, b) { return a.name.localeCompare(b.name); });
+    } else if (currentSort === 'updated') {
+        sorted.sort(function(a, b) { return new Date(b.updated_at) - new Date(a.updated_at); });
+    } else if (currentSort === 'forks') {
+        sorted.sort(function(a, b) { return b.forks_count - a.forks_count; });
+    }
 
     list.innerHTML = '';
-
     sorted.forEach(function(repo) {
         const clone = template.content.cloneNode(true);
         clone.querySelector('.repo-link').textContent = repo.name;
@@ -420,6 +439,27 @@ async function loadLanguages(repos, username) {
         languagesSection.classList.remove('hidden');
     } catch (err) {}
 }
+
+sortBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    sortDropdown.classList.toggle('hidden');
+});
+
+document.querySelectorAll('.sort-option').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        currentSort = this.dataset.sort;
+        const labels = { stars: 'Stars', name: 'Name', updated: 'Updated', forks: 'Forks' };
+        sortLabel.textContent = labels[currentSort];
+        sortDropdown.classList.add('hidden');
+        showAllReposSorted();
+    });
+});
+
+document.addEventListener('click', function(e) {
+    if (!sortDropdown.classList.contains('hidden') && !sortBtn.contains(e.target)) {
+        sortDropdown.classList.add('hidden');
+    }
+});
 
 languagesBtn.addEventListener('click', function() {
     const isOpen = !languagesList.classList.contains('hidden');
