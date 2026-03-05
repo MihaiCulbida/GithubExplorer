@@ -168,8 +168,6 @@ function showAllReposSorted() {
         sorted.sort(function(a, b) { return b.stargazers_count - a.stargazers_count; });
     } else if (currentSort === 'name') {
         sorted.sort(function(a, b) { return a.name.localeCompare(b.name); });
-    } else if (currentSort === 'updated') {
-        sorted.sort(function(a, b) { return new Date(b.updated_at) - new Date(a.updated_at); });
     } else if (currentSort === 'forks') {
         sorted.sort(function(a, b) { return b.forks_count - a.forks_count; });
     }
@@ -448,7 +446,7 @@ sortBtn.addEventListener('click', function(e) {
 document.querySelectorAll('.sort-option').forEach(function(btn) {
     btn.addEventListener('click', function() {
         currentSort = this.dataset.sort;
-        const labels = { stars: 'Stars', name: 'Name', updated: 'Updated', forks: 'Forks' };
+        const labels = { stars: 'Stars', name: 'Name', forks: 'Forks' };
         sortLabel.textContent = labels[currentSort];
         sortDropdown.classList.add('hidden');
         showAllReposSorted();
