@@ -46,10 +46,14 @@ const languagesChevron = document.getElementById('languages-chevron');
 const sortBtn = document.getElementById('sort-btn');
 const sortDropdown = document.getElementById('sort-dropdown');
 const sortLabel = document.getElementById('sort-label');
+const repoSearchBtn = document.getElementById('repo-search-btn');
+const repoSearchWrapper = document.getElementById('repo-search-wrapper');
+const repoSearchInput = document.getElementById('repo-search-input');
 let currentSort = 'stars';
 let isAllReposOpen = false;
 let currentUsername = '';
 let allFollowers = [];
+let repoSearchOpen = false;
 
 function searchUser() {
     const username = searchInput.value.trim();
@@ -140,6 +144,11 @@ reposCard.addEventListener('click', function() {
         document.getElementById('repos-title').textContent = 'Top Repositories';
         backBtn.classList.add('hidden');
         sortBtn.classList.add('hidden');
+        repoSearchBtn.classList.add('hidden');
+        repoSearchWrapper.style.maxWidth = '0';
+        repoSearchWrapper.style.opacity = '0';
+        repoSearchInput.value = '';
+        repoSearchOpen = false;
     } else {
         isAllReposOpen = true;
         currentSort = 'stars';
@@ -148,6 +157,7 @@ reposCard.addEventListener('click', function() {
         document.getElementById('repos-title').textContent = 'All Repositories';
         backBtn.classList.remove('hidden');
         sortBtn.classList.remove('hidden');
+        repoSearchBtn.classList.remove('hidden');
     }
 });
 
@@ -159,6 +169,11 @@ backBtn.addEventListener('click', function(e) {
     backBtn.classList.add('hidden');
     sortBtn.classList.add('hidden');
     sortDropdown.classList.add('hidden');
+    repoSearchBtn.classList.add('hidden');
+    repoSearchWrapper.style.maxWidth = '0';
+    repoSearchWrapper.style.opacity = '0';
+    repoSearchInput.value = '';
+    repoSearchOpen = false;
 });
 
 function showAllReposSorted() {
@@ -470,4 +485,41 @@ languagesBtn.addEventListener('click', function() {
         languagesList.classList.add('flex');
         languagesChevron.style.transform = 'rotate(-90deg)';
     }
+});
+
+repoSearchBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    repoSearchOpen = !repoSearchOpen;
+    if (repoSearchOpen) {
+        repoSearchWrapper.style.maxWidth = '180px';
+        repoSearchWrapper.style.opacity = '1';
+        setTimeout(function() { repoSearchInput.focus(); }, 150);
+    } else {
+        repoSearchWrapper.style.maxWidth = '0';
+        repoSearchWrapper.style.opacity = '0';
+        repoSearchInput.value = '';
+        isAllReposOpen ? showAllReposSorted() : showRepos(allRepos);
+    }
+});
+
+repoSearchInput.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    const base = isAllReposOpen
+        ? allRepos.filter(function(r) { return !r.fork; })
+        : allRepos.filter(function(r) { return !r.fork; }).sort(function(a,b){ return b.stargazers_count - a.stargazers_count; }).slice(0, 6);
+
+    const filtered = q ? base.filter(function(r) {
+        return r.name.toLowerCase().includes(q) || (r.description || '').toLowerCase().includes(q);
+    }) : base;
+
+    list.innerHTML = '';
+    filtered.forEach(function(repo) {
+        const clone = template.content.cloneNode(true);
+        clone.querySelector('.repo-link').textContent = repo.name;
+        clone.querySelector('.repo-link').href = repo.html_url;
+        clone.querySelector('.repo-desc').textContent = repo.description || 'No description';
+        clone.querySelector('.repo-stars').textContent = repo.stargazers_count;
+        clone.querySelector('.repo-lang').textContent = repo.language || 'N/A';
+        list.appendChild(clone);
+    });
 });
