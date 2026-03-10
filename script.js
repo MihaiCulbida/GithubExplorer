@@ -181,8 +181,10 @@ function showAllReposSorted() {
 
     if (currentSort === 'stars') {
         sorted.sort(function(a, b) { return b.stargazers_count - a.stargazers_count; });
-    } else if (currentSort === 'name') {
+    } else if (currentSort === 'name-az') {
         sorted.sort(function(a, b) { return a.name.localeCompare(b.name); });
+    } else if (currentSort === 'name-za') {
+        sorted.sort(function(a, b) { return b.name.localeCompare(a.name); });
     } else if (currentSort === 'forks') {
         sorted.sort(function(a, b) { return b.forks_count - a.forks_count; });
     }
@@ -461,7 +463,7 @@ filterBtn.addEventListener('click', function(e) {
 document.querySelectorAll('.filter-option').forEach(function(btn) {
     btn.addEventListener('click', function() {
         currentSort = this.dataset.sort;
-        const labels = { stars: 'Stars', name: 'Name', forks: 'Forks' };
+        const labels = { all: 'All', stars: 'Stars', 'name-az': 'Name (A-Z)', 'name-za': 'Name (Z-A)', forks: 'Forks' };
         filterLabel.textContent = labels[currentSort];
         filterDropdown.classList.add('hidden');
         showAllReposSorted();

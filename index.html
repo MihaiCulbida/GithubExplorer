@@ -93,12 +93,14 @@
                                 </button>
                                 <div class="relative">
                                     <button id="filter-btn" class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-white hover:scale-105 transition-all duration-200">
-                                        <img src="img/filter.png" class="w-4 h-4 invert" alt="Filter">
+                                        <img src="img/sort.png" class="w-4 h-4 invert" alt="Filter">
                                         <span id="filter-label">Filter</span>
                                     </button>
                                     <div id="filter-dropdown" class="hidden absolute right-0 mt-1 w-44 bg-gray-900 border border-gray-700 rounded-xl shadow-xl z-10 overflow-hidden">
+                                        <button class="filter-option w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition" data-sort="all"> All</button>
                                         <button class="filter-option w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition" data-sort="stars"> Stars</button>
-                                        <button class="filter-option w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition" data-sort="name"> Name (A-Z)</button>
+                                        <button class="filter-option w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition" data-sort="name-az"> Name (A-Z)</button>
+                                        <button class="filter-option w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition" data-sort="name-za"> Name (Z-A)</button>
                                         <button class="filter-option w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition" data-sort="forks"> Forks</button>
                                     </div>
                                 </div>
