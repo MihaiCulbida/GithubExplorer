@@ -43,9 +43,9 @@ const languagesSection = document.getElementById('languages-section');
 const languagesBtn = document.getElementById('languages-btn');
 const languagesList = document.getElementById('languages-list');
 const languagesChevron = document.getElementById('languages-chevron');
-const sortBtn = document.getElementById('sort-btn');
-const sortDropdown = document.getElementById('sort-dropdown');
-const sortLabel = document.getElementById('sort-label');
+const filterBtn = document.getElementById('filter-btn');
+const filterDropdown = document.getElementById('filter-dropdown');
+const filterLabel = document.getElementById('filter-label');
 const repoSearchBtn = document.getElementById('repo-search-btn');
 const repoSearchWrapper = document.getElementById('repo-search-wrapper');
 const repoSearchInput = document.getElementById('repo-search-input');
@@ -143,7 +143,7 @@ reposCard.addEventListener('click', function() {
         showRepos(allRepos);
         document.getElementById('repos-title').textContent = 'Top Repositories';
         backBtn.classList.add('hidden');
-        sortBtn.classList.add('hidden');
+        filterBtn.classList.add('hidden');
         repoSearchBtn.classList.add('hidden');
         repoSearchWrapper.style.maxWidth = '0';
         repoSearchWrapper.style.opacity = '0';
@@ -152,11 +152,11 @@ reposCard.addEventListener('click', function() {
     } else {
         isAllReposOpen = true;
         currentSort = 'stars';
-        sortLabel.textContent = 'Sort';
+        filterLabel.textContent = 'Filter';
         showAllReposSorted();
         document.getElementById('repos-title').textContent = 'All Repositories';
         backBtn.classList.remove('hidden');
-        sortBtn.classList.remove('hidden');
+        filterBtn.classList.remove('hidden');
         repoSearchBtn.classList.remove('hidden');
     }
 });
@@ -167,8 +167,8 @@ backBtn.addEventListener('click', function(e) {
     showRepos(allRepos);
     document.getElementById('repos-title').textContent = 'Top Repositories';
     backBtn.classList.add('hidden');
-    sortBtn.classList.add('hidden');
-    sortDropdown.classList.add('hidden');
+    filterBtn.classList.add('hidden');
+    filterDropdown.classList.add('hidden');
     repoSearchBtn.classList.add('hidden');
     repoSearchWrapper.style.maxWidth = '0';
     repoSearchWrapper.style.opacity = '0';
@@ -453,24 +453,24 @@ async function loadLanguages(repos, username) {
     } catch (err) {}
 }
 
-sortBtn.addEventListener('click', function(e) {
+filterBtn.addEventListener('click', function(e) {
     e.stopPropagation();
-    sortDropdown.classList.toggle('hidden');
+    filterDropdown.classList.toggle('hidden');
 });
 
-document.querySelectorAll('.sort-option').forEach(function(btn) {
+document.querySelectorAll('.filter-option').forEach(function(btn) {
     btn.addEventListener('click', function() {
         currentSort = this.dataset.sort;
         const labels = { stars: 'Stars', name: 'Name', forks: 'Forks' };
-        sortLabel.textContent = labels[currentSort];
-        sortDropdown.classList.add('hidden');
+        filterLabel.textContent = labels[currentSort];
+        filterDropdown.classList.add('hidden');
         showAllReposSorted();
     });
 });
 
 document.addEventListener('click', function(e) {
-    if (!sortDropdown.classList.contains('hidden') && !sortBtn.contains(e.target)) {
-        sortDropdown.classList.add('hidden');
+    if (!filterDropdown.classList.contains('hidden') && !filterBtn.contains(e.target)) {
+        filterDropdown.classList.add('hidden');
     }
 });
 
