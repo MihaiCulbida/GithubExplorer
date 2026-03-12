@@ -49,26 +49,44 @@ const filterLabel = document.getElementById('filter-label');
 const repoSearchBtn = document.getElementById('repo-search-btn');
 const repoSearchWrapper = document.getElementById('repo-search-wrapper');
 const repoSearchInput = document.getElementById('repo-search-input');
+const prStatsSection = document.getElementById('pr-stats-section');
+const prStatsBtn = document.getElementById('pr-stats-btn');
+const prStatsChevron = document.getElementById('pr-stats-chevron');
+const prStatsBody = document.getElementById('pr-stats-body');
+const prStatsLoading = document.getElementById('pr-stats-loading');
+const prStatsContent = document.getElementById('pr-stats-content');
+const prMerged = document.getElementById('pr-merged');
+const prOpen = document.getElementById('pr-open');
+const prClosed = document.getElementById('pr-closed');
+const prTotal = document.getElementById('pr-total');
+
 let currentSort = 'stars';
 let isAllReposOpen = false;
 let currentUsername = '';
 let allFollowers = [];
 let repoSearchOpen = false;
+let prStatsLoaded = false;
 
 function searchUser() {
     const username = searchInput.value.trim();
     if (!username) return;
 
     currentUsername = username;
+    prStatsLoaded = false;
     errorMsg.classList.add('hidden');
     mainLayout.classList.add('hidden');
     mainLayout.classList.remove('flex');
+    prStatsSection.classList.add('hidden');
+    prStatsBody.classList.add('hidden');
+    prStatsContent.classList.add('hidden');
+    prStatsLoading.classList.remove('hidden');
+    prStatsChevron.style.transform = 'rotate(90deg)';
 
     fetch('https://api.github.com/users/' + username)
         .then(function(res) { return res.json(); })
         .then(function(user) {
             if (user.message) throw new Error(user.message);
-            showProfile(user)
+            showProfile(user);
             loadProfileReadme(username);
             return fetch('https://api.github.com/users/' + username + '/repos?sort=stars&per_page=100');
         })
@@ -79,6 +97,7 @@ function searchUser() {
             loadLanguages(repos, username);
             mainLayout.classList.remove('hidden');
             mainLayout.classList.add('flex');
+            prStatsSection.classList.remove('hidden');
         })
         .catch(function(err) {
             errorMsg.textContent = 'Error: ' + err.message;
@@ -199,6 +218,56 @@ function showAllReposSorted() {
         clone.querySelector('.repo-lang').textContent = repo.language || 'N/A';
         list.appendChild(clone);
     });
+}
+
+prStatsBtn.addEventListener('click', function() {
+    const isOpen = !prStatsBody.classList.contains('hidden');
+    if (isOpen) {
+        prStatsBody.classList.add('hidden');
+        prStatsChevron.style.transform = 'rotate(90deg)';
+    } else {
+        prStatsBody.classList.remove('hidden');
+        prStatsChevron.style.transform = 'rotate(-90deg)';
+        if (!prStatsLoaded) {
+            loadPRStats(currentUsername);
+        }
+    }
+});
+
+async function loadPRStats(username) {
+    prStatsLoading.classList.remove('hidden');
+    prStatsContent.classList.add('hidden');
+
+    try {
+        const [mergedRes, openRes, closedRes] = await Promise.all([
+            fetch('https://api.github.com/search/issues?q=is:pr+author:' + username + '+is:merged&per_page=1'),
+            fetch('https://api.github.com/search/issues?q=is:pr+author:' + username + '+is:open&per_page=1'),
+            fetch('https://api.github.com/search/issues?q=is:pr+author:' + username + '+is:closed+is:unmerged&per_page=1')
+        ]);
+
+        const [mergedData, openData, closedData] = await Promise.all([
+            mergedRes.json(),
+            openRes.json(),
+            closedRes.json()
+        ]);
+
+        const mergedCount = mergedData.total_count || 0;
+        const openCount = openData.total_count || 0;
+        const closedCount = closedData.total_count || 0;
+        const totalCount = mergedCount + openCount + closedCount;
+
+        prMerged.textContent = mergedCount;
+        prOpen.textContent = openCount;
+        prClosed.textContent = closedCount;
+        prTotal.textContent = totalCount;
+
+        prStatsLoading.classList.add('hidden');
+        prStatsContent.classList.remove('hidden');
+        prStatsLoaded = true;
+    } catch (err) {
+        prStatsLoading.textContent = 'Failed to load PR stats.';
+        prStatsLoading.classList.add('text-red-400');
+    }
 }
 
 function openFollowersModal() {
@@ -358,7 +427,7 @@ function renderFollowing(users) {
         const item = document.createElement('a');
         item.href = user.html_url;
         item.target = '_blank';
-        item.className = 'flex items-center gap3 p-2 rounded-xl hover:bg-gray-800 transition cursor-pointer group';
+        item.className = 'flex items-center gap-3 p-2 rounded-xl hover:bg-gray-800 transition cursor-pointer group';
 
         item.innerHTML =
             '<img src="' + user.avatar_url + '" alt="' + user.login + '" class="w-10 h-10 rounded-full border border-gray-700 group-hover:border-blue-500 transition">' +
@@ -411,7 +480,7 @@ async function loadProfileReadme(username) {
         const res = await fetch(
             'https://api.github.com/repos/' + username + '/' + username + '/contents/README.md'
         );
-        if (!res.ok) return; 
+        if (!res.ok) return;
 
         const data = await res.json();
         const markdown = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
@@ -423,8 +492,7 @@ async function loadProfileReadme(username) {
         });
 
         readmeSection.classList.remove('hidden');
-    } catch (err) {
-    }
+    } catch (err) {}
 }
 
 async function loadLanguages(repos, username) {

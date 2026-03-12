@@ -66,6 +66,35 @@
                     </button>
                     <div id="languages-list" class="hidden flex-wrap gap-2 px-5 pb-4"></div>
                 </div>
+
+                <div id="pr-stats-section" class="hidden bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                    <button id="pr-stats-btn" class="w-full flex items-center justify-between px-5 py-3 transition">
+                        <span class="text-sm font-semibold text-gray-300">Pull Requests</span>
+                        <img id="pr-stats-chevron" src="img/back.png" class="w-4 h-4 invert rotate-90 transition-transform duration-200 hover:opacity-70 rounded-full p-0.5">
+                    </button>
+                    <div id="pr-stats-body" class="hidden px-5 pb-4">
+                        <div id="pr-stats-loading" class="text-gray-400 text-sm py-2 text-center">Loading...</div>
+                        <div id="pr-stats-content" class="hidden space-y-1">
+                            <div class="flex items-center justify-between py-2 border-b border-gray-800">
+                                <span class="text-sm text-gray-400">Merged</span>
+                                <span id="pr-merged" class="text-sm font-bold text-gray-200">—</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-b border-gray-800">
+                                <span class="text-sm text-gray-400">Open</span>
+                                <span id="pr-open" class="text-sm font-bold text-gray-200">—</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-b border-gray-800">
+                                <span class="text-sm text-gray-400">Closed</span>
+                                <span id="pr-closed" class="text-sm font-bold text-gray-200">—</span>
+                            </div>
+                            <div class="flex items-center justify-between pt-2">
+                                <span class="text-sm font-semibold text-gray-300">Total</span>
+                                <span id="pr-total" class="text-sm font-bold text-white">—</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <div class="flex-1 flex flex-col gap-6">
