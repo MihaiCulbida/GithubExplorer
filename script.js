@@ -70,6 +70,7 @@ let prStatsLoaded = false;
 function searchUser() {
     const username = searchInput.value.trim();
     if (!username) return;
+    history.pushState(null, '', '?user=' + encodeURIComponent(username));
 
     currentUsername = username;
     prStatsLoaded = false;
@@ -593,3 +594,13 @@ repoSearchInput.addEventListener('input', function() {
         list.appendChild(clone);
     });
 });
+
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const user = params.get('user');
+    if (user) {
+        searchInput.value = user;
+        clearBtn.classList.remove('hidden');
+        searchUser();
+    }
+})();
