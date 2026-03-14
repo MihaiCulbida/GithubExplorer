@@ -59,6 +59,15 @@ const prMerged = document.getElementById('pr-merged');
 const prOpen = document.getElementById('pr-open');
 const prClosed = document.getElementById('pr-closed');
 const prTotal = document.getElementById('pr-total');
+const issueStatsSection = document.getElementById('issue-stats-section');
+const issueStatsBtn = document.getElementById('issue-stats-btn');
+const issueStatsChevron = document.getElementById('issue-stats-chevron');
+const issueStatsBody = document.getElementById('issue-stats-body');
+const issueStatsLoading = document.getElementById('issue-stats-loading');
+const issueStatsContent = document.getElementById('issue-stats-content');
+const issueOpen = document.getElementById('issue-open');
+const issueClosed = document.getElementById('issue-closed');
+const issueTotal = document.getElementById('issue-total');
 
 let currentSort = 'stars';
 let isAllReposOpen = false;
@@ -66,6 +75,7 @@ let currentUsername = '';
 let allFollowers = [];
 let repoSearchOpen = false;
 let prStatsLoaded = false;
+let issueStatsLoaded = false;
 
 function searchUser() {
     const username = searchInput.value.trim();
@@ -74,6 +84,7 @@ function searchUser() {
 
     currentUsername = username;
     prStatsLoaded = false;
+    issueStatsLoaded = false;
     errorMsg.classList.add('hidden');
     mainLayout.classList.add('hidden');
     mainLayout.classList.remove('flex');
@@ -81,7 +92,14 @@ function searchUser() {
     prStatsBody.classList.add('hidden');
     prStatsContent.classList.add('hidden');
     prStatsLoading.classList.remove('hidden');
+    prStatsLoading.textContent = 'Loading...';
     prStatsChevron.style.transform = 'rotate(90deg)';
+    issueStatsSection.classList.add('hidden');
+    issueStatsBody.classList.add('hidden');
+    issueStatsContent.classList.add('hidden');
+    issueStatsLoading.classList.remove('hidden');
+    issueStatsLoading.textContent = 'Loading...';
+    issueStatsChevron.style.transform = 'rotate(90deg)';
 
     fetch('https://api.github.com/users/' + username)
         .then(function(res) { return res.json(); })
@@ -99,6 +117,7 @@ function searchUser() {
             mainLayout.classList.remove('hidden');
             mainLayout.classList.add('flex');
             prStatsSection.classList.remove('hidden');
+            issueStatsSection.classList.remove('hidden');
         })
         .catch(function(err) {
             errorMsg.textContent = 'Error: ' + err.message;
@@ -268,6 +287,52 @@ async function loadPRStats(username) {
     } catch (err) {
         prStatsLoading.textContent = 'Failed to load PR stats.';
         prStatsLoading.classList.add('text-red-400');
+    }
+}
+
+issueStatsBtn.addEventListener('click', function() {
+    const isOpen = !issueStatsBody.classList.contains('hidden');
+    if (isOpen) {
+        issueStatsBody.classList.add('hidden');
+        issueStatsChevron.style.transform = 'rotate(90deg)';
+    } else {
+        issueStatsBody.classList.remove('hidden');
+        issueStatsChevron.style.transform = 'rotate(-90deg)';
+        if (!issueStatsLoaded) {
+            loadIssueStats(currentUsername);
+        }
+    }
+});
+
+async function loadIssueStats(username) {
+    issueStatsLoading.classList.remove('hidden');
+    issueStatsContent.classList.add('hidden');
+
+    try {
+        const [openRes, closedRes] = await Promise.all([
+            fetch('https://api.github.com/search/issues?q=is:issue+author:' + username + '+is:open&per_page=1'),
+            fetch('https://api.github.com/search/issues?q=is:issue+author:' + username + '+is:closed&per_page=1')
+        ]);
+
+        const [openData, closedData] = await Promise.all([
+            openRes.json(),
+            closedRes.json()
+        ]);
+
+        const openCount = openData.total_count || 0;
+        const closedCount = closedData.total_count || 0;
+        const totalCount = openCount + closedCount;
+
+        issueOpen.textContent = openCount;
+        issueClosed.textContent = closedCount;
+        issueTotal.textContent = totalCount;
+
+        issueStatsLoading.classList.add('hidden');
+        issueStatsContent.classList.remove('hidden');
+        issueStatsLoaded = true;
+    } catch (err) {
+        issueStatsLoading.textContent = 'Failed to load issue stats.';
+        issueStatsLoading.classList.add('text-red-400');
     }
 }
 
