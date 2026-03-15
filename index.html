@@ -77,19 +77,19 @@
                         <div id="pr-stats-content" class="hidden space-y-1">
                             <div class="flex items-center justify-between py-2 border-b border-gray-800">
                                 <span class="text-sm text-gray-400">Merged</span>
-                                <span id="pr-merged" class="text-sm font-bold text-gray-400">—</span>
+                                <button id="pr-merged-btn" class="text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer transition">—</button>
                             </div>
                             <div class="flex items-center justify-between py-2 border-b border-gray-800">
                                 <span class="text-sm text-gray-400">Open</span>
-                                <span id="pr-open" class="text-sm font-bold text-gray-400">—</span>
+                                <button id="pr-open-btn" class="text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer transition">—</button>
                             </div>
                             <div class="flex items-center justify-between py-2 border-b border-gray-800">
                                 <span class="text-sm text-gray-400">Closed</span>
-                                <span id="pr-closed" class="text-sm font-bold text-gray-400">—</span>
+                                <button id="pr-closed-btn" class="text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer transition">—</button>
                             </div>
                             <div class="flex items-center justify-between pt-2">
                                 <span class="text-sm font-semibold text-gray-300">Total</span>
-                                <span id="pr-total" class="text-sm font-bold text-white">—</span>
+                                <button id="pr-total-btn" class="text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer transition">—</button>
                             </div>
                         </div>
                     </div>
@@ -231,6 +231,25 @@
             </div>
             <div id="issue-repos-footer" class="px-6 pb-4 hidden">
                 <p id="issue-repos-count-info" class="text-gray-500 text-xs text-center"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="pr-repos-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+                <p id="pr-repos-modal-title" class="text-lg font-bold">Pull Requests</p>
+                <button id="close-pr-repos-modal" class="text-gray-400 hover:text-white transition text-2xl leading-none">&times;</button>
+            </div>
+            <div class="px-6 pt-4">
+                <input id="pr-repos-search" type="text" placeholder="Search..."
+                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500">
+            </div>
+            <div id="pr-repos-list" class="overflow-y-auto max-h-80 px-6 py-4 space-y-2 [scrollbar-width:none]">
+                <p id="pr-repos-loading" class="text-gray-400 text-center text-sm py-6">Loading...</p>
+            </div>
+            <div id="pr-repos-footer" class="px-6 pb-4 hidden">
+                <p id="pr-repos-count-info" class="text-gray-500 text-xs text-center"></p>
             </div>
         </div>
     </div>
