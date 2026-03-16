@@ -1,3 +1,5 @@
+const GITHUB_TOKEN = null;
+
 function ghFetch(url) {
     const headers = { 'Accept': 'application/vnd.github+json' };
     if (GITHUB_TOKEN) headers['Authorization'] = 'Bearer ' + GITHUB_TOKEN;
