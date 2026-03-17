@@ -14,18 +14,71 @@ let currentSort = 'stars';
 let isAllReposOpen = false;
 let repoSearchOpen = false;
 
-function showRepos(repos) {
-    const top = repos
-        .filter(function(r) { return !r.fork; })
-        .sort(function(a, b) { return b.stargazers_count - a.stargazers_count; })
-        .slice(0, 6);
+async function loadPinnedRepos(username) {
+    const query = `
+    {
+      user(login: "${username}") {
+        pinnedItems(first: 6, types: REPOSITORY) {
+          nodes {
+            ... on Repository {
+              name
+              description
+              url
+              stargazerCount
+              primaryLanguage { name }
+              forkCount
+            }
+          }
+        }
+      }
+    }`;
 
+    const res = await fetch('https://api.github.com/graphql', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + GITHUB_TOKEN,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query })
+    });
+
+    const data = await res.json();
+    return data.data?.user?.pinnedItems?.nodes || [];
+}
+
+async function showRepos(repos) {
     list.innerHTML = '';
-    top.forEach(function(repo) { renderRepoCard(repo); });
+    backBtn.classList.add('hidden');
+    filterBtn.classList.add('hidden');
+    repoSearchBtn.classList.add('hidden');
+    isAllReposOpen = false;
+    repoSearchOpen = false;
+    repoSearchWrapper.style.maxWidth = '0';
+    repoSearchWrapper.style.opacity = '0';
+    repoSearchInput.value = '';
+    filterDropdown.classList.add('hidden');
+
+    const pinned = await loadPinnedRepos(currentUsername);
+    if (pinned.length > 0) {
+        pinned.forEach(function(repo) {
+            renderRepoCard({
+                name: repo.name,
+                description: repo.description,
+                html_url: repo.url,
+                stargazers_count: repo.stargazerCount,
+                language: repo.primaryLanguage?.name || null,
+                forks_count: repo.forkCount
+            });
+        });
+    } else {
+        reposTitleEl.textContent = 'No pinned repositories';
+    }
 }
 
 function showAllReposSorted() {
-    let sorted = currentSort === 'forks' ? allRepos.filter(function(r) { return r.fork; }) : allRepos.filter(function(r) { return !r.fork; });
+    let sorted = currentSort === 'forks'
+        ? allRepos.filter(function(r) { return r.fork; })
+        : allRepos.filter(function(r) { return !r.fork; });
 
     if (currentSort === 'stars') {
         sorted.sort(function(a, b) { return b.stargazers_count - a.stargazers_count; });
@@ -51,10 +104,9 @@ function renderRepoCard(repo) {
     list.appendChild(clone);
 }
 
-function resetToTop() {
+function resetToPinned() {
     isAllReposOpen = false;
-    showRepos(allRepos);
-    reposTitleEl.textContent = 'Top Repositories';
+    repoSearchOpen = false;
     backBtn.classList.add('hidden');
     filterBtn.classList.add('hidden');
     repoSearchBtn.classList.add('hidden');
@@ -62,13 +114,14 @@ function resetToTop() {
     repoSearchWrapper.style.maxWidth = '0';
     repoSearchWrapper.style.opacity = '0';
     repoSearchInput.value = '';
-    repoSearchOpen = false;
+    reposTitleEl.textContent = 'Pinned Repositories'; 
+    showRepos(allRepos);
 }
 
 reposCard.addEventListener('click', function() {
     if (!currentUsername) return;
     if (isAllReposOpen) {
-        resetToTop();
+        resetToPinned();
     } else {
         isAllReposOpen = true;
         currentSort = 'stars';
@@ -83,7 +136,7 @@ reposCard.addEventListener('click', function() {
 
 backBtn.addEventListener('click', function(e) {
     e.stopPropagation();
-    resetToTop();
+    resetToPinned();
 });
 
 filterBtn.addEventListener('click', function(e) {
@@ -118,19 +171,19 @@ repoSearchBtn.addEventListener('click', function(e) {
         repoSearchWrapper.style.maxWidth = '0';
         repoSearchWrapper.style.opacity = '0';
         repoSearchInput.value = '';
-        isAllReposOpen ? showAllReposSorted() : showRepos(allRepos);
+        showAllReposSorted();
     }
 });
 
 repoSearchInput.addEventListener('input', function() {
     const q = this.value.trim().toLowerCase();
     const base = isAllReposOpen
-    ? (currentSort === 'forks'
-        ? allRepos.filter(function(r) { return r.fork; })
-        : allRepos.filter(function(r) { return !r.fork; }))
-    : allRepos.filter(function(r) { return !r.fork; })
-        .sort(function(a,b){ return b.stargazers_count - a.stargazers_count; })
-        .slice(0, 6);
+        ? (currentSort === 'forks'
+            ? allRepos.filter(function(r) { return r.fork; })
+            : allRepos.filter(function(r) { return !r.fork; }))
+        : allRepos.filter(function(r) { return !r.fork; })
+            .sort(function(a,b){ return b.stargazers_count - a.stargazers_count; })
+            .slice(0, 6);
 
     const filtered = q ? base.filter(function(r) {
         return r.name.toLowerCase().includes(q) || (r.description || '').toLowerCase().includes(q);

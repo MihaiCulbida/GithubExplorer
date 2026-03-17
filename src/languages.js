@@ -6,6 +6,9 @@ const languagesChevron = document.getElementById('languages-chevron');
 async function loadLanguages(repos, username) {
     languagesSection.classList.add('hidden');
     languagesList.innerHTML = '';
+    languagesList.classList.add('hidden');
+    languagesList.classList.remove('flex');
+    languagesChevron.style.transform = 'rotate(90deg)';
 
     try {
         const requests = repos

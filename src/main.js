@@ -71,8 +71,10 @@ function searchUser() {
         .then(function(res) { return res.json(); })
         .then(function(repos) {
             allRepos = repos;
-            showRepos(repos);
             loadLanguages(repos, username);
+            return showRepos(repos); 
+        })
+        .then(function() {
             mainLayout.classList.remove('hidden');
             mainLayout.classList.add('flex');
             prStatsSection.classList.remove('hidden');
