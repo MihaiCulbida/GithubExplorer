@@ -25,7 +25,7 @@ function showRepos(repos) {
 }
 
 function showAllReposSorted() {
-    let sorted = allRepos.filter(function(r) { return !r.fork; });
+    let sorted = currentSort === 'forks' ? allRepos.filter(function(r) { return r.fork; }) : allRepos.filter(function(r) { return !r.fork; });
 
     if (currentSort === 'stars') {
         sorted.sort(function(a, b) { return b.stargazers_count - a.stargazers_count; });
@@ -125,8 +125,12 @@ repoSearchBtn.addEventListener('click', function(e) {
 repoSearchInput.addEventListener('input', function() {
     const q = this.value.trim().toLowerCase();
     const base = isAllReposOpen
-        ? allRepos.filter(function(r) { return !r.fork; })
-        : allRepos.filter(function(r) { return !r.fork; }).sort(function(a,b){ return b.stargazers_count - a.stargazers_count; }).slice(0, 6);
+    ? (currentSort === 'forks'
+        ? allRepos.filter(function(r) { return r.fork; })
+        : allRepos.filter(function(r) { return !r.fork; }))
+    : allRepos.filter(function(r) { return !r.fork; })
+        .sort(function(a,b){ return b.stargazers_count - a.stargazers_count; })
+        .slice(0, 6);
 
     const filtered = q ? base.filter(function(r) {
         return r.name.toLowerCase().includes(q) || (r.description || '').toLowerCase().includes(q);
