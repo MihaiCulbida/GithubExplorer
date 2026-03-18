@@ -161,6 +161,14 @@
                         </div>
                     <div id="repos-list"></div>
                 </div>
+
+                <div id="activity-section" class="hidden bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                    <div class="px-5 py-3 border-b border-gray-800 flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-300">Contributions</span>
+                        <span id="activity-total" class="text-xs text-gray-500"></span>
+                    </div>
+                    <div id="activity-grid-container" class="px-5 py-4"></div>
+                </div>
             </div>
         </div>
 
@@ -261,6 +269,7 @@
     <script src="src/following.js"></script>
     <script src="src/issues.js"></script>
     <script src="src/pull-request.js"></script>
+    <script src="src/activity.js"></script>
     <script src="src/main.js"></script>
 </body>
 </html>

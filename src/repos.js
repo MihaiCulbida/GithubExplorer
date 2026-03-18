@@ -114,8 +114,9 @@ function resetToPinned() {
     repoSearchWrapper.style.maxWidth = '0';
     repoSearchWrapper.style.opacity = '0';
     repoSearchInput.value = '';
-    reposTitleEl.textContent = 'Pinned Repositories'; 
+    reposTitleEl.textContent = 'Pinned Repositories';
     showRepos(allRepos);
+    activitySection.classList.remove('hidden');
 }
 
 reposCard.addEventListener('click', function() {
@@ -131,6 +132,7 @@ reposCard.addEventListener('click', function() {
         backBtn.classList.remove('hidden');
         filterBtn.classList.remove('hidden');
         repoSearchBtn.classList.remove('hidden');
+        activitySection.classList.add('hidden');
     }
 });
 

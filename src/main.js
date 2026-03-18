@@ -27,6 +27,7 @@ const twitterRow = document.getElementById('twitter-row');
 const twitterEl = document.getElementById('twitter');
 const companyRow = document.getElementById('company-row');
 const companyEl = document.getElementById('company');
+const activityTotalEl = document.getElementById('activity-total');
 
 let currentUsername = '';
 let allRepos = [];
@@ -72,7 +73,8 @@ function searchUser() {
         .then(function(repos) {
             allRepos = repos;
             loadLanguages(repos, username);
-            return showRepos(repos); 
+            loadActivityChart(username);
+            return showRepos(repos);
         })
         .then(function() {
             mainLayout.classList.remove('hidden');
