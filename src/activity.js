@@ -88,6 +88,7 @@ async function fetchViaEvents(username) {
 function renderHeatmap(dayMap, username) {
     const container = document.getElementById('activity-grid-container');
     if (!container) return;
+    container.innerHTML = '';
 
     const today = new Date();
     today.setHours(0,0,0,0);

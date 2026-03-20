@@ -13,6 +13,7 @@ const reposTitleEl = document.getElementById('repos-title');
 let currentSort = 'stars';
 let isAllReposOpen = false;
 let repoSearchOpen = false;
+let reposRenderToken = 0;
 
 async function loadPinnedRepos(username) {
     const query = `
@@ -47,6 +48,8 @@ async function loadPinnedRepos(username) {
 }
 
 async function showRepos(repos) {
+    const myToken = ++reposRenderToken;
+
     list.innerHTML = '';
     backBtn.classList.add('hidden');
     filterBtn.classList.add('hidden');
@@ -59,6 +62,8 @@ async function showRepos(repos) {
     filterDropdown.classList.add('hidden');
 
     const pinned = await loadPinnedRepos(currentUsername);
+    if (myToken !== reposRenderToken) return;
+
     if (pinned.length > 0) {
         pinned.forEach(function(repo) {
             renderRepoCard({

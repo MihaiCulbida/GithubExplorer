@@ -2,8 +2,10 @@ const languagesSection = document.getElementById('languages-section');
 const languagesBtn = document.getElementById('languages-btn');
 const languagesList = document.getElementById('languages-list');
 const languagesChevron = document.getElementById('languages-chevron');
+let languagesRenderToken = 0;
 
 async function loadLanguages(repos, username) {
+    const myToken = ++languagesRenderToken;
     languagesSection.classList.add('hidden');
     languagesList.innerHTML = '';
     languagesList.classList.add('hidden');
@@ -19,6 +21,8 @@ async function loadLanguages(repos, username) {
             });
 
         const results = await Promise.all(requests);
+        if (myToken !== languagesRenderToken) return;
+
         const unique = [...new Set(results.flatMap(function(obj) { return Object.keys(obj); }))];
 
         if (unique.length === 0) return;
