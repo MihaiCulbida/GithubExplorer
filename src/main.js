@@ -42,10 +42,10 @@ function searchUser() {
     issueStatsLoaded = false;
     issueReposCache = { open: null, closed: null, all: null };
     prReposCache = { merged: null, open: null, closed: null, all: null };
-
     errorMsg.classList.add('hidden');
     mainLayout.classList.add('hidden');
     mainLayout.classList.remove('flex');
+    document.getElementById('starred-btn').classList.add('hidden');
 
     prStatsSection.classList.add('hidden');
     prStatsBody.classList.add('hidden');
@@ -67,6 +67,7 @@ function searchUser() {
             if (user.message) throw new Error(user.message);
             showProfile(user);
             loadProfileReadme(username);
+            initStarredBtn(username);
             return ghFetch('https://api.github.com/users/' + username + '/repos?sort=stars&per_page=100');
         })
         .then(function(res) { return res.json(); })
