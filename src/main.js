@@ -11,6 +11,7 @@ const btn = document.getElementById('btn');
 const clearBtn = document.getElementById('clear-btn');
 const errorMsg = document.getElementById('error-msg');
 const mainLayout = document.getElementById('main-layout');
+const skeletonLayout = document.getElementById('skeleton-layout');
 const avatar = document.getElementById('avatar');
 const nameEl = document.getElementById('name');
 const loginEl = document.getElementById('login');
@@ -32,6 +33,21 @@ const activityTotalEl = document.getElementById('activity-total');
 let currentUsername = '';
 let allRepos = [];
 
+function showSkeleton() {
+    errorMsg.classList.add('hidden');
+    mainLayout.classList.add('hidden');
+    mainLayout.classList.remove('flex');
+    skeletonLayout.classList.remove('hidden');
+    skeletonLayout.classList.add('flex');
+}
+
+function hideSkeleton() {
+    skeletonLayout.classList.add('hidden');
+    skeletonLayout.classList.remove('flex');
+    mainLayout.classList.remove('hidden');
+    mainLayout.classList.add('flex');
+}
+
 function searchUser() {
     const username = searchInput.value.trim();
     if (!username) return;
@@ -42,9 +58,6 @@ function searchUser() {
     issueStatsLoaded = false;
     issueReposCache = { open: null, closed: null, all: null };
     prReposCache = { merged: null, open: null, closed: null, all: null };
-    errorMsg.classList.add('hidden');
-    mainLayout.classList.add('hidden');
-    mainLayout.classList.remove('flex');
     document.getElementById('starred-btn').classList.add('hidden');
 
     prStatsSection.classList.add('hidden');
@@ -60,6 +73,8 @@ function searchUser() {
     issueStatsLoading.classList.remove('hidden');
     issueStatsLoading.textContent = 'Loading...';
     issueStatsChevron.style.transform = 'rotate(90deg)';
+
+    showSkeleton();
 
     ghFetch('https://api.github.com/users/' + username)
         .then(function(res) { return res.json(); })
@@ -78,12 +93,13 @@ function searchUser() {
             return showRepos(repos);
         })
         .then(function() {
-            mainLayout.classList.remove('hidden');
-            mainLayout.classList.add('flex');
+            hideSkeleton();
             prStatsSection.classList.remove('hidden');
             issueStatsSection.classList.remove('hidden');
         })
         .catch(function(err) {
+            skeletonLayout.classList.add('hidden');
+            skeletonLayout.classList.remove('flex');
             errorMsg.textContent = 'Error: ' + err.message;
             errorMsg.classList.remove('hidden');
         });
