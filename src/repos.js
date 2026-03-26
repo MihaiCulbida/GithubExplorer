@@ -11,9 +11,11 @@ const repoSearchInput = document.getElementById('repo-search-input');
 const reposTitleEl = document.getElementById('repos-title');
 
 let currentSort = 'stars';
+let currentLangFilter = null;
 let isAllReposOpen = false;
 let repoSearchOpen = false;
 let reposRenderToken = 0;
+let langDropdownExpanded = false;
 
 async function loadPinnedRepos(username) {
     const query = `
@@ -80,10 +82,111 @@ async function showRepos(repos) {
     }
 }
 
+function getRepoLanguages() {
+    const langs = new Set();
+    allRepos.filter(function(r) { return !r.fork; }).forEach(function(r) {
+        if (r.language) langs.add(r.language);
+    });
+    return Array.from(langs).sort();
+}
+
+function buildLanguageFilter(langs) {
+    const existing = filterDropdown.querySelector('.lang-filter-section');
+    if (existing) existing.remove();
+
+    if (langs.length === 0) return;
+
+    const SHOW_MAX = 6;
+    langDropdownExpanded = false;
+
+    const section = document.createElement('div');
+    section.className = 'lang-filter-section';
+
+    const divider = document.createElement('div');
+    divider.className = 'border-t border-gray-700 mx-2 my-1';
+    section.appendChild(divider);
+
+    const label = document.createElement('p');
+    label.className = 'px-4 pt-1.5 pb-1 text-xs text-gray-500 font-semibold uppercase tracking-wider';
+    label.textContent = 'Language';
+    section.appendChild(label);
+
+    const langList = document.createElement('div');
+    langList.className = 'lang-list';
+    section.appendChild(langList);
+
+    function renderLangItems() {
+        langList.innerHTML = '';
+        const visible = langDropdownExpanded ? langs : langs.slice(0, SHOW_MAX);
+
+        visible.forEach(function(lang) {
+            const btn = document.createElement('button');
+            btn.className = 'filter-lang-option w-full text-left px-4 py-2 text-sm transition flex items-center justify-between ' +
+                (currentLangFilter === lang ? 'text-blue-400 bg-gray-800' : 'text-gray-300 hover:bg-gray-800');
+            btn.dataset.lang = lang;
+
+            const langSpan = document.createElement('span');
+            langSpan.textContent = lang;
+            btn.appendChild(langSpan);
+
+            if (currentLangFilter === lang) {
+                const check = document.createElement('span');
+                check.textContent = '✓';
+                check.className = 'text-blue-400 text-xs';
+                btn.appendChild(check);
+            }
+
+            btn.addEventListener('click', function() {
+                if (currentLangFilter === lang) {
+                    currentLangFilter = null;
+                } else {
+                    currentLangFilter = lang;
+                }
+                filterDropdown.classList.add('hidden');
+                updateFilterLabel();
+                showAllReposSorted();
+                buildLanguageFilter(langs);
+            });
+
+            langList.appendChild(btn);
+        });
+
+        if (langs.length > SHOW_MAX) {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'w-full text-left px-4 py-2 text-xs text-blue-400 hover:bg-gray-800 transition font-medium';
+            toggleBtn.textContent = langDropdownExpanded
+                ? 'See less'
+                : '+ ' + (langs.length - SHOW_MAX) + ' more languages';
+
+            toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                langDropdownExpanded = !langDropdownExpanded;
+                renderLangItems();
+            });
+
+            langList.appendChild(toggleBtn);
+        }
+    }
+
+    renderLangItems();
+    filterDropdown.appendChild(section);
+}
+
+function updateFilterLabel() {
+    const sortLabels = { all: 'All', stars: 'Stars', 'name-az': 'Name (A-Z)', 'name-za': 'Name (Z-A)', forks: 'Forks' };
+    let label = sortLabels[currentSort] || 'Filter';
+    if (currentLangFilter) label += ' · ' + currentLangFilter;
+    filterLabel.textContent = label;
+}
+
 function showAllReposSorted() {
     let sorted = currentSort === 'forks'
         ? allRepos.filter(function(r) { return r.fork; })
         : allRepos.filter(function(r) { return !r.fork; });
+
+    if (currentLangFilter) {
+        sorted = sorted.filter(function(r) { return r.language === currentLangFilter; });
+    }
 
     if (currentSort === 'stars') {
         sorted.sort(function(a, b) { return b.stargazers_count - a.stargazers_count; });
@@ -96,6 +199,15 @@ function showAllReposSorted() {
     }
 
     list.innerHTML = '';
+
+    if (sorted.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'text-gray-500 text-sm text-center py-10';
+        empty.textContent = 'No repositories found' + (currentLangFilter ? ' for ' + currentLangFilter : '') + '.';
+        list.appendChild(empty);
+        return;
+    }
+
     sorted.forEach(function(repo) { renderRepoCard(repo); });
 }
 
@@ -112,6 +224,7 @@ function renderRepoCard(repo) {
 function resetToPinned() {
     isAllReposOpen = false;
     repoSearchOpen = false;
+    currentLangFilter = null;
     backBtn.classList.add('hidden');
     filterBtn.classList.add('hidden');
     repoSearchBtn.classList.add('hidden');
@@ -131,7 +244,13 @@ reposCard.addEventListener('click', function() {
     } else {
         isAllReposOpen = true;
         currentSort = 'stars';
+        currentLangFilter = null;
         filterLabel.textContent = 'Filter';
+        langDropdownExpanded = false;
+
+        const langs = getRepoLanguages();
+        buildLanguageFilter(langs);
+
         showAllReposSorted();
         reposTitleEl.textContent = 'All Repositories';
         backBtn.classList.remove('hidden');
@@ -154,8 +273,7 @@ filterBtn.addEventListener('click', function(e) {
 document.querySelectorAll('.filter-option').forEach(function(btn) {
     btn.addEventListener('click', function() {
         currentSort = this.dataset.sort;
-        const labels = { all: 'All', stars: 'Stars', 'name-az': 'Name (A-Z)', 'name-za': 'Name (Z-A)', forks: 'Forks' };
-        filterLabel.textContent = labels[currentSort];
+        updateFilterLabel();
         filterDropdown.classList.add('hidden');
         showAllReposSorted();
     });
@@ -192,10 +310,23 @@ repoSearchInput.addEventListener('input', function() {
             .sort(function(a,b){ return b.stargazers_count - a.stargazers_count; })
             .slice(0, 6);
 
-    const filtered = q ? base.filter(function(r) {
-        return r.name.toLowerCase().includes(q) || (r.description || '').toLowerCase().includes(q);
-    }) : base;
+    let filtered = currentLangFilter
+        ? base.filter(function(r) { return r.language === currentLangFilter; })
+        : base;
+
+    if (q) {
+        filtered = filtered.filter(function(r) {
+            return r.name.toLowerCase().includes(q) || (r.description || '').toLowerCase().includes(q);
+        });
+    }
 
     list.innerHTML = '';
+    if (filtered.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'text-gray-500 text-sm text-center py-10';
+        empty.textContent = 'No repositories found.';
+        list.appendChild(empty);
+        return;
+    }
     filtered.forEach(function(repo) { renderRepoCard(repo); });
 });
