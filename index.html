@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GitHub Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-dark.min.css">
+    <link rel="icon" type="image" href="img/logo.png">
+    <style>
+        .markdown-body { background: transparent !important; font-size: 0.875rem; }
+    </style>
+</head>
+<body class="bg-gray-950 min-h-screen text-white font-sans">
+
+    <div class="text-center py-12">
+        <h1 class="text-4xl font-bold mb-2">GitHub Explorer</h1>
+        <p class="text-gray-400">Search any GitHub profile</p>
+    </div>
+
+    <div class="flex justify-center gap-2 mb-10 px-4">
+        <div class="relative w-full max-w-md">
+            <input type="text" id="search" autocomplete="off" placeholder="Enter GitHub username..."
+                class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 pr-8">
+            <button id="clear-btn" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-400 transition hidden">✕</button>
+        </div>
+        <button id="btn" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition">Search</button>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4">
+        <p id="error-msg" class="text-red-400 hidden mb-4"></p>
+
+        <div id="skeleton-layout" class="hidden gap-6 items-start">
+            <div class="flex flex-col gap-4 w-72 shrink-0">
+                <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+                    <div class="w-24 h-24 rounded-full bg-gray-700 animate-pulse mb-4"></div>
+                    <div class="h-5 w-2/3 bg-gray-700 animate-pulse rounded-md mb-2"></div>
+                    <div class="h-3 w-1/3 bg-gray-700 animate-pulse rounded-md mb-4"></div>
+                    <div class="h-3 w-full bg-gray-700 animate-pulse rounded-md mb-2"></div>
+                    <div class="h-3 w-4/5 bg-gray-700 animate-pulse rounded-md mb-4"></div>
+                    <div class="space-y-2 mb-4">
+                        <div class="h-3 w-1/2 bg-gray-700 animate-pulse rounded-md"></div>
+                        <div class="h-3 w-2/3 bg-gray-700 animate-pulse rounded-md"></div>
+                        <div class="h-3 w-1/2 bg-gray-700 animate-pulse rounded-md"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="h-16 bg-gray-700 animate-pulse rounded-xl"></div>
+                        <div class="h-16 bg-gray-700 animate-pulse rounded-xl"></div>
+                        <div class="h-16 bg-gray-700 animate-pulse rounded-xl"></div>
+                    </div>
+                    <div class="h-9 w-full bg-gray-700 animate-pulse rounded-xl mt-3"></div>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4">
+                    <div class="h-3 w-1/2 bg-gray-700 animate-pulse rounded-md"></div>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4">
+                    <div class="h-3 w-2/5 bg-gray-700 animate-pulse rounded-md"></div>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl px-5 py-4">
+                    <div class="h-3 w-1/3 bg-gray-700 animate-pulse rounded-md"></div>
+                </div>
+            </div>
+            <div class="flex-1 flex flex-col gap-6">
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                    <div class="px-5 py-3 border-b border-gray-800">
+                        <div class="h-3 w-40 bg-gray-700 animate-pulse rounded-md"></div>
+                    </div>
+                    <div class="px-6 py-5 space-y-2">
+                        <div class="h-3 w-full bg-gray-700 animate-pulse rounded-md"></div>
+                        <div class="h-3 w-11/12 bg-gray-700 animate-pulse rounded-md"></div>
+                        <div class="h-3 w-4/5 bg-gray-700 animate-pulse rounded-md"></div>
+                        <div class="h-3 w-full bg-gray-700 animate-pulse rounded-md"></div>
+                        <div class="h-3 w-3/4 bg-gray-700 animate-pulse rounded-md"></div>
+                        <div class="h-3 w-full bg-gray-700 animate-pulse rounded-md"></div>
+                        <div class="h-3 w-2/3 bg-gray-700 animate-pulse rounded-md"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="h-5 w-44 bg-gray-700 animate-pulse rounded-md mb-4"></div>
+                    <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-3">
+                        <div class="h-4 w-1/2 bg-gray-700 animate-pulse rounded-md mb-3"></div>
+                        <div class="h-3 w-5/6 bg-gray-700 animate-pulse rounded-md mb-2"></div>
+                        <div class="h-3 w-3/5 bg-gray-700 animate-pulse rounded-md mb-3"></div>
+                        <div class="h-3 w-1/4 bg-gray-700 animate-pulse rounded-md"></div>
+                    </div>
+                    <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-3">
+                        <div class="h-4 w-2/5 bg-gray-700 animate-pulse rounded-md mb-3"></div>
+                        <div class="h-3 w-full bg-gray-700 animate-pulse rounded-md mb-2"></div>
+                        <div class="h-3 w-4/5 bg-gray-700 animate-pulse rounded-md mb-3"></div>
+                        <div class="h-3 w-1/3 bg-gray-700 animate-pulse rounded-md"></div>
+                    </div>
+                    <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-3">
+                        <div class="h-4 w-3/5 bg-gray-700 animate-pulse rounded-md mb-3"></div>
+                        <div class="h-3 w-3/4 bg-gray-700 animate-pulse rounded-md mb-2"></div>
+                        <div class="h-3 w-1/2 bg-gray-700 animate-pulse rounded-md mb-3"></div>
+                        <div class="h-3 w-1/4 bg-gray-700 animate-pulse rounded-md"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-layout" class="hidden gap-6 items-start">
+            <div class="flex flex-col gap-4 w-72 shrink-0">
+                <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+                    <img id="avatar" src="" alt="Avatar" class="w-24 h-24 rounded-full border-2 border-blue-500 mb-4">
+                    <h2 id="name" class="text-xl font-bold"></h2>
+                    <p id="login" class="text-blue-400 mb-2"></p>
+                    <p id="bio" class="text-gray-400 text-sm mb-4"></p>
+                    <div class="space-y-1 text-sm mb-4">
+                        <p id="location-row" class="text-white">Location: <span id="location"></span></p>
+                        <p id="blog-row" class="text-white">Link: <a id="blog" href="#" target="_blank" class="text-blue-400 hover:underline"></a></p>
+                        <p id="twitter-row" class="text-white">Twitter: <span id="twitter"></span></p>
+                        <p id="company-row" class="text-white">Company: <span id="company"></span></p>
+                        <p class="text-white">Created at: <span id="created-at"></span></p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div id="followers-card" class="bg-gray-800 rounded-xl p-3 cursor-pointer hover:bg-gray-700 transition" title="Click to see followers">
+                            <p id="followers" class="text-lg font-bold text-blue-400"></p>
+                            <p class="text-gray-400 text-xs">Followers</p>
+                        </div>
+                        <div id="following-card" class="bg-gray-800 rounded-xl p-3 cursor-pointer hover:bg-gray-700 transition" title="Click to see following">
+                            <p id="following" class="text-lg font-bold text-blue-400"></p>
+                            <p class="text-gray-400 text-xs">Following</p>
+                        </div>
+                        <div id="repos-card" class="bg-gray-800 rounded-xl p-3 cursor-pointer hover:bg-gray-700 transition" title="Click to see all repos">
+                            <p id="repos-count" class="text-lg font-bold text-blue-400"></p>
+                            <p class="text-gray-400 text-xs">Repos</p>
+                        </div>
+                    </div>
+                    <button id="starred-btn" class="hidden mt-3 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 text-sm font-medium transition-all duration-200" title="View starred repositories">
+                        <img src="img/star.png" class="w-4 h-4 invert" alt="Star">
+                        <span id="starred-btn-label">Starred Repos</span>
+                    </button>
+                </div>
+                <div id="languages-section" class="hidden bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                    <button id="languages-btn" class="w-full flex items-center justify-between px-5 py-3 transition">
+                        <span class="text-sm font-semibold text-gray-300">Languages</span>
+                        <img id="languages-chevron" src="img/back.png" class="w-4 h-4 invert rotate-90 transition-transform duration-200 hover:opacity-70 rounded-full p-0.5">
+                    </button>
+                    <div id="languages-list" class="hidden flex-wrap gap-2 px-5 pb-4"></div>
+                </div>
+                <div id="pr-stats-section" class="hidden bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                    <button id="pr-stats-btn" class="w-full flex items-center justify-between px-5 py-3 transition">
+                        <span class="text-sm font-semibold text-gray-300">Pull Requests</span>
+                        <img id="pr-stats-chevron" src="img/back.png" class="w-4 h-4 invert rotate-90 transition-transform duration-200 hover:opacity-70 rounded-full p-0.5">
+                    </button>
+                    <div id="pr-stats-body" class="hidden px-5 pb-4">
+                        <div id="pr-stats-loading" class="text-gray-400 text-sm py-2 text-center">Loading...</div>
+                        <div id="pr-stats-content" class="hidden space-y-1">
+                            <div class="flex items-center justify-between py-2 border-b border-gray-800">
+                                <span class="text-sm text-gray-400">Merged</span>
+                                <button id="pr-merged-btn" class="text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer transition">—</button>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-b border-gray-800">
+                                <span class="text-sm text-gray-400">Open</span>
+                                <button id="pr-open-btn" class="text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer transition">—</button>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-b border-gray-800">
+                                <span class="text-sm text-gray-400">Closed</span>
+                                <button id="pr-closed-btn" class="text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer transition">—</button>
+                            </div>
+                            <div class="flex items-center justify-between pt-2">
+                                <span class="text-sm font-semibold text-gray-300">Total</span>
+                                <button id="pr-total-btn" class="text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer transition">—</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="issue-stats-section" class="hidden bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                    <button id="issue-stats-btn" class="w-full flex items-center justify-between px-5 py-3 transition">
+                        <span class="text-sm font-semibold text-gray-300">Issues</span>
+                        <img id="issue-stats-chevron" src="img/back.png" class="w-4 h-4 invert rotate-90 transition-transform duration-200 hover:opacity-70 rounded-full p-0.5">
+                    </button>
+                    <div id="issue-stats-body" class="hidden px-5 pb-4">
+                        <div id="issue-stats-loading" class="text-gray-400 text-sm py-2 text-center">Loading...</div>
+                        <div id="issue-stats-content" class="hidden space-y-1">
+                            <div class="flex items-center justify-between py-2 border-b border-gray-800">
+                                <span class="text-sm text-gray-400">Open</span>
+                                <button id="issue-open-btn" class="text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer transition">—</button>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-b border-gray-800">
+                                <span class="text-sm text-gray-400">Closed</span>
+                                <button id="issue-closed-btn" class="text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer transition">—</button>
+                            </div>
+                            <div class="flex items-center justify-between pt-2">
+                                <span class="text-sm font-semibold text-gray-300">Total</span>
+                                <button id="issue-total-btn" class="text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer transition">—</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col gap-6">
+                <div id="readme-section" class="hidden bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                    <div class="px-5 py-3 border-b border-gray-800">
+                        <span id="readme-title" class="text-sm font-semibold text-gray-300"></span>
+                    </div>
+                    <div id="readme-body" class="markdown-body px-6 py-5"></div>
+                </div>
+                <div id="repos-section">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <button id="back-btn" class="hidden cursor-pointer hover:opacity-70 transition">
+                                <img src="img/back.png" class="w-6 h-6 invert" alt="Back">
+                            </button>
+                            <h3 id="repos-title" class="text-lg font-semibold text-gray-300">Pinned Repositories</h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-1.5 overflow-hidden transition-all duration-300" id="repo-search-wrapper" style="max-width: 0; opacity: 0;">
+                                <input id="repo-search-input" type="text" placeholder="Search..."
+                                    class="w-40 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500 transition-all duration-300">
+                            </div>
+                            <button id="repo-search-btn" class="hidden inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-800 transition-all duration-200 hover:scale-105" title="Search repos">
+                                <img src="img/search.png" class="w-4 h-4 invert" alt="Search">
+                            </button>
+                            <div class="relative">
+                                <button id="filter-btn" class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-white hover:scale-105 transition-all duration-200">
+                                    <img src="img/filter.png" class="w-4 h-4 invert" alt="Filter">
+                                    <span id="filter-label">Filter</span>
+                                </button>
+                                <div id="filter-dropdown" class="hidden absolute right-0 mt-1 w-44 bg-gray-900 border border-gray-700 rounded-xl shadow-xl z-10 overflow-hidden">
+                                    <button class="filter-option w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition" data-sort="all"> All</button>
+                                    <button class="filter-option w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition" data-sort="stars"> Stars</button>
+                                    <button class="filter-option w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition" data-sort="name-az"> Name (A-Z)</button>
+                                    <button class="filter-option w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition" data-sort="name-za"> Name (Z-A)</button>
+                                    <button class="filter-option w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 transition" data-sort="forks"> Forks</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="repos-list"></div>
+                </div>
+                <div id="activity-section" class="hidden bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                    <div class="px-5 py-3 border-b border-gray-800 flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-300">Contributions</span>
+                        <span id="activity-total" class="text-xs text-gray-500"></span>
+                    </div>
+                    <div id="activity-grid-container" class="px-5 py-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <template id="repo-template">
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-3">
+                <a class="repo-link text-blue-400 font-semibold hover:underline text-lg" href="#" target="_blank"></a>
+                <p class="repo-desc text-gray-400 text-sm mt-1"></p>
+                <div class="flex gap-4 mt-2 text-sm text-gray-500">
+                    <span class="flex items-center gap-1"><img src="img/star.png" class="w-5 h-5 invert"> <span class="repo-stars"></span></span>
+                    <span class="flex items-center gap-1"><img src="img/language.png" class="w-6 h-6 invert"> <span class="repo-lang"></span></span>
+                </div>
+            </div>
+        </template>
+
+        <template id="starred-repo-template">
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-3">
+                <div class="flex items-center gap-2 mb-1">
+                    <img class="starred-owner-avatar w-5 h-5 rounded-full border border-gray-700" src="" alt="">
+                    <span class="starred-owner-login text-gray-500 text-xs"></span>
+                </div>
+                <a class="starred-repo-link text-blue-400 font-semibold hover:underline text-lg" href="#" target="_blank"></a>
+                <p class="starred-repo-desc text-gray-400 text-sm mt-1"></p>
+                <div class="flex gap-4 mt-2 text-sm text-gray-500">
+                    <span class="flex items-center gap-1">
+                        <img src="img/star.png" class="w-5 h-5 invert" alt="Stars">
+                        <span class="starred-repo-stars"></span>
+                    </span>
+                    <span class="flex items-center gap-1"><img src="img/language.png" class="w-6 h-6 invert"> <span class="starred-repo-lang"></span></span>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Followers Modal -->
+    <div id="followers-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+                <p class="text-lg font-bold">Followers</p>
+                <button id="close-modal" class="text-gray-400 hover:text-white transition text-2xl leading-none">&times;</button>
+            </div>
+            <div class="px-6 pt-4">
+                <input id="followers-search" type="text" placeholder="Filter followers..."
+                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500">
+            </div>
+            <div id="followers-list" class="overflow-y-auto max-h-80 px-6 py-4 space-y-3 [scrollbar-width:none]">
+                <p id="followers-loading" class="text-gray-400 text-center text-sm py-6">Loading...</p>
+            </div>
+            <div id="modal-footer" class="px-6 pb-4 hidden">
+                <p id="followers-count-info" class="text-gray-500 text-xs text-center"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="following-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+                <p class="text-lg font-bold">Following</p>
+                <button id="close-following-modal" class="text-gray-400 hover:text-white transition text-2xl leading-none">&times;</button>
+            </div>
+            <div class="px-6 pt-4">
+                <input id="following-search" type="text" placeholder="Filter following..."
+                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500">
+            </div>
+            <div id="following-list" class="overflow-y-auto max-h-80 px-6 py-4 space-y-3 [scrollbar-width:none]">
+                <p id="following-loading" class="text-gray-400 text-center text-sm py-6">Loading...</p>
+            </div>
+            <div id="following-modal-footer" class="px-6 pb-4 hidden">
+                <p id="following-count-info" class="text-gray-500 text-xs text-center"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="issue-repos-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+                <p id="issue-repos-modal-title" class="text-lg font-bold">Issues</p>
+                <button id="close-issue-repos-modal" class="text-gray-400 hover:text-white transition text-2xl leading-none">&times;</button>
+            </div>
+            <div class="px-6 pt-4">
+                <input id="issue-repos-search" type="text" placeholder="Search..."
+                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500">
+            </div>
+            <div id="issue-repos-list" class="overflow-y-auto max-h-80 px-6 py-4 space-y-2 [scrollbar-width:none]">
+                <p id="issue-repos-loading" class="text-gray-400 text-center text-sm py-6">Loading...</p>
+            </div>
+            <div id="issue-repos-footer" class="px-6 pb-4 hidden">
+                <p id="issue-repos-count-info" class="text-gray-500 text-xs text-center"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="pr-repos-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+                <p id="pr-repos-modal-title" class="text-lg font-bold">Pull Requests</p>
+                <button id="close-pr-repos-modal" class="text-gray-400 hover:text-white transition text-2xl leading-none">&times;</button>
+            </div>
+            <div class="px-6 pt-4">
+                <input id="pr-repos-search" type="text" placeholder="Search..."
+                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500">
+            </div>
+            <div id="pr-repos-list" class="overflow-y-auto max-h-80 px-6 py-4 space-y-2 [scrollbar-width:none]">
+                <p id="pr-repos-loading" class="text-gray-400 text-center text-sm py-6">Loading...</p>
+            </div>
+            <div id="pr-repos-footer" class="px-6 pb-4 hidden">
+                <p id="pr-repos-count-info" class="text-gray-500 text-xs text-center"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="src/repos.js"></script>
+    <script src="src/languages.js"></script>
+    <script src="src/readme.js"></script>
+    <script src="src/followers.js"></script>
+    <script src="src/following.js"></script>
+    <script src="src/issues.js"></script>
+    <script src="src/pull-request.js"></script>
+    <script src="src/activity.js"></script>
+    <script src="src/starred.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>
