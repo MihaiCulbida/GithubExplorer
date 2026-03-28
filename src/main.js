@@ -203,7 +203,7 @@ document.addEventListener('keydown', function(e) {
     tokenToggle.addEventListener('click', function() {
         const isHidden = tokenInput.type === 'password';
         tokenInput.type = isHidden ? 'text' : 'password';
-        this.textContent = isHidden ? 'n' : 'v';
+        tokenToggle.querySelector('img').src = isHidden ? 'img/hide.png' : 'img/show.png';
     });
 
     tokenInput.addEventListener('input', function() {
