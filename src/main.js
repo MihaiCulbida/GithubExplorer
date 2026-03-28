@@ -219,9 +219,13 @@ document.addEventListener('keydown', function(e) {
     tokenSaveBtn.addEventListener('click', function() {
         const val = tokenInput.value.trim();
         if (!val) {
-            tokenStatus.textContent = 'Please enter a valid token.';
-            tokenStatus.className = 'text-xs text-center text-red-400';
+            GITHUB_TOKEN = null;
+            localStorage.removeItem('gh_token');
+            updateTokenBtnState();
+            tokenStatus.textContent = 'Token cleared.';
+            tokenStatus.className = 'text-xs text-center text-gray-400';
             tokenStatus.classList.remove('hidden');
+            setTimeout(closeTokenModalFn, 1200);
             return;
         }
         GITHUB_TOKEN = val;
