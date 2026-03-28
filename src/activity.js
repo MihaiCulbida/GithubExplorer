@@ -93,15 +93,24 @@ function renderHeatmap(dayMap, username) {
     const today = new Date();
     today.setHours(0,0,0,0);
 
+    // Start from last Sunday, one year ago
     const startDate = new Date(today);
     startDate.setFullYear(today.getFullYear() - 1);
-    const startDay = startDate.getDay();
+    // Roll back to the nearest Sunday (day 0)
+    const startDay = startDate.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
     startDate.setDate(startDate.getDate() - startDay);
+
+    function toLocalISO(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
+    }
 
     const days = [];
     const cur = new Date(startDate);
     while (cur <= today) {
-        const iso = cur.toISOString().split('T')[0];
+        const iso = toLocalISO(cur);
         days.push({ date: iso, count: dayMap[iso] || 0 });
         cur.setDate(cur.getDate() + 1);
     }
@@ -126,7 +135,7 @@ function renderHeatmap(dayMap, username) {
     }
 
     function getColorLight(count) {
-        if (count === 0) return '#ebedf0';
+        if (count === 0) return '#161b22';
         const t = Math.min(count / (maxCount * 0.6), 1);
         if (t < 0.25) return '#9be9a8';
         if (t < 0.5)  return '#40c463';
@@ -151,12 +160,12 @@ function renderHeatmap(dayMap, username) {
         if (d.getDate() <= 7) {
             monthLabels.push({
                 x: LABEL_W + wi * (CELL + GAP),
-                label: d.toLocaleString('default', { month: 'short' })
+                label: d.toLocaleString('en-US', { month: 'short' })
             });
         }
     });
 
-    const dayLabels = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+    const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     let cells = '';
     weeks.forEach(function(week, wi) {
@@ -179,14 +188,14 @@ function renderHeatmap(dayMap, username) {
 
     let dlSvg = '';
     dayLabels.forEach(function(label, i) {
-        if (!label) return;
+        if (i !== 1 && i !== 3 && i !== 5) return;
         const y = LABEL_H + i * (CELL + GAP) + CELL - 1;
         dlSvg += '<text x="' + (LABEL_W - 4) + '" y="' + y + '" font-size="10" text-anchor="end" fill="' + (isDark ? '#8b949e' : '#57606a') + '" font-family="sans-serif">' + label + '</text>';
     });
 
     const legendColors = isDark
         ? ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353']
-        : ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'];
+        : ['#161b22', '#9be9a8', '#40c463', '#30a14e', '#216e39'];
 
     let legendSvg = '<text x="0" y="11" font-size="10" fill="' + (isDark ? '#8b949e' : '#57606a') + '" font-family="sans-serif">Less</text>';
     legendColors.forEach(function(c, i) {
