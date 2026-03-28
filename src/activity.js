@@ -131,16 +131,6 @@ function renderHeatmap(dayMap, username) {
         return '#39d353';
     }
 
-    function getColorLight(count) {
-        if (count === 0) return '#161b22';
-        const t = Math.min(count / (maxCount * 0.6), 1);
-        if (t < 0.25) return '#0e4429';
-        if (t < 0.5)  return '#006d32';
-        if (t < 0.75) return '#26a641';
-        return '#39d353';
-    }
-
-    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
     const CELL = 11;
     const GAP = 3;
@@ -170,7 +160,7 @@ function renderHeatmap(dayMap, username) {
             if (!day) return;
             const x = LABEL_W + wi * (CELL + GAP);
             const y = LABEL_H + di * (CELL + GAP);
-            const color = isDark ? getColor(day.count) : getColorLight(day.count);
+            const color = getColor(day.count);
             cells += '<rect x="' + x + '" y="' + y + '" width="' + CELL + '" height="' + CELL + '" rx="2"' +
                 ' fill="' + color + '"' +
                 ' data-date="' + day.date + '" data-count="' + day.count + '"' +
@@ -180,29 +170,27 @@ function renderHeatmap(dayMap, username) {
 
     let mlSvg = '';
     monthLabels.forEach(function(m) {
-        mlSvg += '<text x="' + m.x + '" y="12" font-size="10" fill="' + (isDark ? '#8b949e' : '#57606a') + '" font-family="sans-serif">' + m.label + '</text>';
+        mlSvg += '<text x="' + m.x + '" y="12" font-size="10" fill="#8b949e" font-family="sans-serif">' + m.label + '</text>';
     });
 
     let dlSvg = '';
     dayLabels.forEach(function(label, i) {
         if (i !== 1 && i !== 3 && i !== 5) return;
         const y = LABEL_H + i * (CELL + GAP) + CELL - 1;
-        dlSvg += '<text x="' + (LABEL_W - 4) + '" y="' + y + '" font-size="10" text-anchor="end" fill="' + (isDark ? '#8b949e' : '#57606a') + '" font-family="sans-serif">' + label + '</text>';
+        dlSvg += '<text x="' + (LABEL_W - 4) + '" y="' + y + '" font-size="10" text-anchor="end" fill="#8b949e" font-family="sans-serif">' + label + '</text>';
     });
 
-    const legendColors = isDark
-        ? ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353']
-        : ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'];
+    const legendColors = ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'];
 
-    let legendSvg = '<text x="0" y="11" font-size="10" fill="' + (isDark ? '#8b949e' : '#57606a') + '" font-family="sans-serif">Less</text>';
+    let legendSvg = '<text x="0" y="11" font-size="10" fill="#8b949e" font-family="sans-serif">Less</text>';
     legendColors.forEach(function(c, i) {
         legendSvg += '<rect x="' + (32 + i * (CELL + 2)) + '" y="0" width="' + CELL + '" height="' + CELL + '" rx="2" fill="' + c + '"/>';
     });
-    legendSvg += '<text x="' + (32 + legendColors.length * (CELL + 2) + 4) + '" y="11" font-size="10" fill="' + (isDark ? '#8b949e' : '#57606a') + '" font-family="sans-serif">More</text>';
+    legendSvg += '<text x="' + (32 + legendColors.length * (CELL + 2) + 4) + '" y="11" font-size="10" fill="#8b949e" font-family="sans-serif">More</text>';
 
     const tooltipEl = document.createElement('div');
     tooltipEl.id = 'hm-tooltip';
-    tooltipEl.style.cssText = 'position:absolute;background:' + (isDark ? '#161b22' : '#24292f') + ';color:#fff;font-size:11px;padding:4px 8px;border-radius:5px;pointer-events:none;opacity:0;transition:opacity .1s;white-space:nowrap;font-family:sans-serif;z-index:10;';
+    tooltipEl.style.cssText = 'position:absolute;background:#161b22;color:#fff;font-size:11px;padding:4px 8px;border-radius:5px;pointer-events:none;opacity:0;transition:opacity .1s;white-space:nowrap;font-family:sans-serif;z-index:10;';
     container.style.position = 'relative';
     container.appendChild(tooltipEl);
 
