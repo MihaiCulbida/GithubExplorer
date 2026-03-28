@@ -1,4 +1,4 @@
-const GITHUB_TOKEN = null;
+let GITHUB_TOKEN = localStorage.getItem('gh_token') || null;
 
 function ghFetch(url) {
     const headers = { 'Accept': 'application/vnd.github+json' };
@@ -153,8 +153,92 @@ document.addEventListener('keydown', function(e) {
         closeFollowingModalFn();
         closeIssueReposModalFn();
         closePrReposModalFn();
+        closeTokenModalFn();
     }
 });
+
+(function() {
+    const tokenBtn = document.getElementById('token-btn');
+    const tokenBtnLabel = document.getElementById('token-btn-label');
+    const tokenModal = document.getElementById('token-modal');
+    const closeTokenModalBtn = document.getElementById('close-token-modal');
+    const tokenInput = document.getElementById('token-input');
+    const tokenSaveBtn = document.getElementById('token-save-btn');
+    const tokenStatus = document.getElementById('token-status');
+    const tokenToggle = document.getElementById('token-toggle-visibility');
+    const tokenClearInput = document.getElementById('token-clear-input');
+
+    function updateTokenBtnState() {
+        if (GITHUB_TOKEN) {
+            tokenBtnLabel.textContent = 'Token ✓';
+            tokenBtn.classList.add('border-green-700', 'text-green-400');
+            tokenBtn.classList.remove('border-gray-700', 'text-gray-300');
+        } else {
+            tokenBtnLabel.textContent = 'Token';
+            tokenBtn.classList.remove('border-green-700', 'text-green-400');
+            tokenBtn.classList.add('border-gray-700', 'text-gray-300');
+        }
+    }
+
+    window.closeTokenModalFn = function() {
+        tokenModal.classList.add('hidden');
+        tokenModal.classList.remove('flex');
+    };
+
+    function openTokenModal() {
+        tokenInput.value = GITHUB_TOKEN || '';
+        tokenClearInput.classList.toggle('hidden', !tokenInput.value);
+        tokenStatus.classList.add('hidden');
+        tokenModal.classList.remove('hidden');
+        tokenModal.classList.add('flex');
+        setTimeout(function() { tokenInput.focus(); }, 50);
+    }
+
+    tokenBtn.addEventListener('click', openTokenModal);
+    closeTokenModalBtn.addEventListener('click', closeTokenModalFn);
+    tokenModal.addEventListener('click', function(e) {
+        if (e.target === tokenModal) closeTokenModalFn();
+    });
+
+    tokenToggle.addEventListener('click', function() {
+        const isHidden = tokenInput.type === 'password';
+        tokenInput.type = isHidden ? 'text' : 'password';
+        this.textContent = isHidden ? 'n' : 'v';
+    });
+
+    tokenInput.addEventListener('input', function() {
+        tokenClearInput.classList.toggle('hidden', this.value === '');
+    });
+
+    tokenClearInput.addEventListener('click', function() {
+        tokenInput.value = '';
+        this.classList.add('hidden');
+        tokenInput.focus();
+    });
+
+    tokenSaveBtn.addEventListener('click', function() {
+        const val = tokenInput.value.trim();
+        if (!val) {
+            tokenStatus.textContent = 'Please enter a valid token.';
+            tokenStatus.className = 'text-xs text-center text-red-400';
+            tokenStatus.classList.remove('hidden');
+            return;
+        }
+        GITHUB_TOKEN = val;
+        localStorage.setItem('gh_token', val);
+        updateTokenBtnState();
+        tokenStatus.textContent = 'Token saved!';
+        tokenStatus.className = 'text-xs text-center text-green-400';
+        tokenStatus.classList.remove('hidden');
+        setTimeout(closeTokenModalFn, 1200);
+    });
+
+    tokenInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') tokenSaveBtn.click();
+    });
+
+    updateTokenBtnState();
+})();
 
 (function() {
     const params = new URLSearchParams(window.location.search);
