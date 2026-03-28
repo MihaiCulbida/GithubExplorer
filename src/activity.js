@@ -92,12 +92,9 @@ function renderHeatmap(dayMap, username) {
 
     const today = new Date();
     today.setHours(0,0,0,0);
-
-    // Start from last Sunday, one year ago
     const startDate = new Date(today);
     startDate.setFullYear(today.getFullYear() - 1);
-    // Roll back to the nearest Sunday (day 0)
-    const startDay = startDate.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    const startDay = startDate.getDay(); 
     startDate.setDate(startDate.getDate() - startDay);
 
     function toLocalISO(d) {
@@ -137,10 +134,10 @@ function renderHeatmap(dayMap, username) {
     function getColorLight(count) {
         if (count === 0) return '#161b22';
         const t = Math.min(count / (maxCount * 0.6), 1);
-        if (t < 0.25) return '#9be9a8';
-        if (t < 0.5)  return '#40c463';
-        if (t < 0.75) return '#30a14e';
-        return '#216e39';
+        if (t < 0.25) return '#0e4429';
+        if (t < 0.5)  return '#006d32';
+        if (t < 0.75) return '#26a641';
+        return '#39d353';
     }
 
     const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -195,7 +192,7 @@ function renderHeatmap(dayMap, username) {
 
     const legendColors = isDark
         ? ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353']
-        : ['#161b22', '#9be9a8', '#40c463', '#30a14e', '#216e39'];
+        : ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'];
 
     let legendSvg = '<text x="0" y="11" font-size="10" fill="' + (isDark ? '#8b949e' : '#57606a') + '" font-family="sans-serif">Less</text>';
     legendColors.forEach(function(c, i) {
