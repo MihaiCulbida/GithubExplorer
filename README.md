@@ -32,3 +32,6 @@ GitHub Token Support - Optionally add a personal GitHub token to increase API ra
 4. Browse the profile - use the sidebar sections to explore repositories, languages, pull requests, issues, and more
 5. Optionally add a GitHub token via the token button to avoid hitting API rate limits
 
+# How to Open
+
+Try it directly in your browser: https://mihaiculbida.github.io/GithubExplorer/
