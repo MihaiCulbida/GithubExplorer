@@ -24,6 +24,16 @@ Starred Repos - List of repositories the user has starred
 
 GitHub Token Support - Optionally add a personal GitHub token to increase API rate limits
 
+
+# GitHub Token
+
+The GitHub API has a default rate limit of 60 requests per hour for unauthenticated requests. To increase this limit, you can provide a personal access token:
+
+1. Go to https://github.com/settings/tokens
+2. Generate a new token (no special scopes required for public data)
+3. Click the token icon in the app and paste your token
+4. Click Save - the token is stored locally in your browser
+
 # How to Use
 
 1. Open the app in your browser
