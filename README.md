@@ -23,3 +23,12 @@ Issues - Issue stats split by Open, Closed, and Total
 Starred Repos - List of repositories the user has starred
 
 GitHub Token Support - Optionally add a personal GitHub token to increase API rate limits
+
+# How to Use
+
+1. Open the app in your browser
+2. Type any GitHub username into the search bar
+3. Press Enter or click Search
+4. Browse the profile - use the sidebar sections to explore repositories, languages, pull requests, issues, and more
+5. Optionally add a GitHub token via the token button to avoid hitting API rate limits
+
