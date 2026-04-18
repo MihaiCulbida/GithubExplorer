@@ -42,6 +42,3 @@ The GitHub API has a default rate limit of 60 requests per hour for unauthentica
 4. Browse the profile - use the sidebar sections to explore repositories, languages, pull requests, issues, and more
 5. Optionally add a GitHub token via the token button to avoid hitting API rate limits
 
-# How to Open
-
-Try it directly in your browser: https://mihaiculbida.github.io/GithubExplorer/
